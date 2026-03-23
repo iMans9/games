@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حروف مع منصور</title>
+    <title>مسابقة حروف المطورة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
@@ -14,19 +14,16 @@
             min-height: 100vh; color: white; margin: 0; overflow-x: hidden;
         }
 
-        /* حاوية اللعبة الرئيسية */
         .game-container {
-            display: grid;
-            grid-template-columns: 1fr 300px 320px;
+            display: grid; grid-template-columns: 1fr 300px 320px;
             gap: 20px; padding: 20px; max-width: 1400px; margin: 0 auto;
         }
 
-        /* خلية النحل - خلفية الألوان المتقاطعة */
         .board-wrapper {
             background: linear-gradient(45deg, #16a34a 50%, #f97316 50%);
             padding: 30px; border-radius: 20px; border: 8px solid #facc15;
             display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3); position: relative;
         }
 
         .hex-grid { display: flex; flex-direction: column; align-items: center; }
@@ -41,12 +38,10 @@
             color: #312e81; margin: 2px;
         }
 
-        /* حالات الألوان */
-        .state-1 { background: #facc15; color: black; box-shadow: 0 0 15px #facc15; }
-        .state-2 { background: #22c55e; color: white; }
-        .state-3 { background: #f97316; color: white; }
+        .state-1 { background: #facc15 !important; color: black; } 
+        .state-2 { background: #22c55e !important; color: white; } /* أخضر */
+        .state-3 { background: #f97316 !important; color: white; } /* برتقالي */
 
-        /* منطقة السؤال */
         .question-box {
             background: linear-gradient(to bottom, #ef4444, #b91c1c);
             border-radius: 30px; padding: 30px; text-align: center;
@@ -54,104 +49,98 @@
             border: 4px solid rgba(255,255,255,0.2);
         }
 
-        /* القائمة الجانبية */
         .side-menu { display: flex; flex-direction: column; gap: 15px; }
         .score-card { border-radius: 20px; padding: 15px; text-align: center; font-weight: 900; }
-        .btn-side { 
-            background: rgba(255,255,255,0.2); backdrop-blur: md; 
-            padding: 15px; border-radius: 15px; text-align: right;
-            display: flex; align-items: center; gap: 10px; transition: 0.3s;
-        }
-        .btn-side:hover { background: rgba(255,255,255,0.3); }
 
-        /* الشاشات الصغيرة */
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 3000; text-align: center; pointer-events: none;
+        }
+        .show-overlay { display: flex; animation: fadeIn 0.5s forwards; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         @media (max-width: 1024px) {
             .game-container { grid-template-columns: 1fr; }
-            .side-menu { order: 3; }
-            .board-wrapper { order: 1; }
-            .question-box { order: 2; min-height: 250px; }
-            .hex-row { margin-bottom: -12px; }
-            .hexagon { width: 50px; height: 58px; font-size: 1.4rem; }
-            .hex-row:nth-child(even) { transform: translateX(26px); }
+            .hexagon { width: 55px; height: 64px; font-size: 1.5rem; }
+            .hex-row:nth-child(even) { transform: translateX(28px); }
         }
-
-        /* طبقة الفوز */
-        .overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 1000; text-align: center;
-        }
-        .show-win { display: flex; animation: fadeIn 0.5s; }
     </style>
 </head>
 <body>
 
+    <div id="setup-screen" class="fixed inset-0 z-[4000] bg-[#0a0412] flex items-center justify-center p-4">
+        <div class="bg-white/10 backdrop-blur-3xl p-10 rounded-[3rem] border border-white/20 text-center w-full max-w-md shadow-2xl">
+            <h1 class="text-3xl font-black text-yellow-500 mb-6">إعداد المسابقة</h1>
+            <input type="text" id="game-title-input" placeholder="اسم المسابقة (مثلاً: حروف مع منصور)" class="w-full p-4 mb-4 rounded-2xl bg-black/60 border border-white/20 text-white text-center outline-none">
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <input type="text" id="team1-name-input" value="الفريق الأخضر" class="p-3 rounded-xl bg-green-900/40 border border-green-500 text-white text-center font-bold">
+                <input type="text" id="team2-name-input" value="الفريق البرتقالي" class="p-3 rounded-xl bg-orange-900/40 border border-orange-500 text-white text-center font-bold">
+            </div>
+            <button onclick="startGame()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl text-xl hover:scale-105 transition">ابدأ اللعب</button>
+        </div>
+    </div>
+
     <header class="p-4 flex justify-between items-center bg-black/10">
         <div class="flex gap-3">
             <button onclick="location.reload()" class="bg-purple-600 px-4 py-2 rounded-full text-sm font-bold">لعبة جديدة</button>
-            <button class="bg-blue-600 px-4 py-2 rounded-full text-sm font-bold">طريقة اللعبة</button>
         </div>
-        <div class="text-xl font-black text-yellow-400">حروف مع <span id="user-name">منصور</span></div>
+        <div class="text-xl font-black text-yellow-400" id="main-title">حروف</div>
     </header>
 
     <div class="game-container">
-        
         <div class="board-wrapper">
             <div id="grid-main" class="hex-grid"></div>
         </div>
 
         <div class="question-box">
             <div class="bg-white/20 w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl font-black mb-4" id="current-letter">-</div>
-            <div class="text-sm opacity-80 mb-2">السؤال</div>
+            <div class="text-sm opacity-80 mb-2" id="round-label">الجولة الأولى</div>
             <div class="text-xl font-bold leading-relaxed" id="question-text">اضغط على حرف لبدء السؤال..</div>
             <button class="mt-8 bg-white/20 py-3 rounded-full font-black hover:bg-white/30 transition">اضغط للإجابة</button>
         </div>
 
         <div class="side-menu">
-            <div class="text-center font-black mb-2 flex items-center justify-center gap-2">
-                <span>🏆</span> لوحة النتائج
-            </div>
-            
-            <div class="score-card bg-orange-600">
-                <div class="text-lg">فريق واحد</div>
-                <div class="text-4xl" id="score2">0 فوز</div>
-            </div>
-
             <div class="score-card bg-green-600">
-                <div class="text-lg">فريق اثنين</div>
+                <div class="text-lg" id="t1-display">الفريق الأخضر</div>
                 <div class="text-4xl" id="score1">0 فوز</div>
             </div>
-
-            <button onclick="shuffleGrid()" class="btn-side text-purple-200">
-                <span>🎲</span> توزيع عشوائي
-            </button>
-            <button onclick="clearBoard()" class="btn-side text-red-300">
-                <span>🗑️</span> تفريغ اللوحة
-            </button>
-            <button class="btn-side text-blue-200">
-                <span>🎨</span> الإعدادات
-            </button>
+            <div class="score-card bg-orange-600">
+                <div class="text-lg" id="t2-display">الفريق البرتقالي</div>
+                <div class="text-4xl" id="score2">0 فوز</div>
+            </div>
+            <button onclick="shuffleGrid()" class="bg-white/10 p-4 rounded-xl font-bold">🎲 توزيع عشوائي</button>
+            <button onclick="clearBoard()" class="bg-white/10 p-4 rounded-xl font-bold text-red-300">🗑️ تفريغ اللوحة</button>
         </div>
     </div>
 
     <div id="win-overlay" class="overlay">
-        <h1 class="text-6xl font-black text-yellow-400 mb-4">🏆 بطل المسابقة 🏆</h1>
-        <h2 id="winner-name-display" class="text-4xl font-bold mb-8"></h2>
-        <p class="text-xl opacity-70">سيتم بدء جولة جديدة تلقائياً...</p>
+        <h1 id="win-msg-main" class="text-6xl font-black text-yellow-400 mb-4 italic"></h1>
+        <h2 id="win-msg-sub" class="text-4xl font-bold text-white"></h2>
     </div>
 
     <audio id="final-win-audio" src="https://raw.githubusercontent.com/iMans9/mp3/main/win.mp3"></audio>
 
     <script>
         const letters = "أبتثجحخدذرزسشصضطظعغفقلمنهوي".split("");
-        let score1 = 0, score2 = 0, roundIdx = 1, isLocked = false;
-        let gridData = [];
+        let score1 = 0, score2 = 0, roundIdx = 1, isLocked = false, gridData = [];
+        let team1Name = "", team2Name = "";
+
+        function startGame() {
+            team1Name = document.getElementById('team1-name-input').value || "الأخضر";
+            team2Name = document.getElementById('team2-name-input').value || "البرتقالي";
+            document.getElementById('main-title').innerText = document.getElementById('game-title-input').value || "حروف";
+            document.getElementById('t1-display').innerText = team1Name;
+            document.getElementById('t2-display').innerText = team2Name;
+            document.getElementById('setup-screen').classList.add('hidden');
+            renderGrid();
+        }
 
         function renderGrid() {
             const grid = document.getElementById('grid-main');
             grid.innerHTML = ''; gridData = [];
             let pool = [...letters].sort(() => 0.5 - Math.random()).slice(0, 25);
-            
             for (let r = 0; r < 5; r++) {
                 const row = document.createElement('div');
                 row.className = 'hex-row';
@@ -160,7 +149,15 @@
                     const hex = document.createElement('div');
                     hex.className = 'hexagon';
                     hex.innerText = pool[r * 5 + c];
-                    hex.onclick = () => handleHexClick(hex, r, c);
+                    hex.dataset.state = "0";
+                    hex.onclick = () => {
+                        if(isLocked) return;
+                        document.getElementById('current-letter').innerText = hex.innerText;
+                        let s = (parseInt(hex.dataset.state) + 1) % 4;
+                        hex.dataset.state = s;
+                        hex.className = `hexagon state-${s}`;
+                        checkWinner();
+                    };
                     row.appendChild(hex);
                     gridData[r][c] = hex;
                 }
@@ -168,37 +165,53 @@
             }
         }
 
-        function handleHexClick(hex, r, c) {
-            if(isLocked) return;
-            document.getElementById('current-letter').innerText = hex.innerText;
-            let s = (parseInt(hex.dataset.state || 0) + 1) % 4;
-            hex.dataset.state = s;
-            hex.className = `hexagon state-${s}`;
-            checkWinner();
-        }
-
         function checkWinner() {
-            if (hasPath(2, 'vertical')) announceWin(1);
-            else if (hasPath(3, 'horizontal')) announceWin(2);
+            if (hasPath(2, 'vertical')) announceRoundWin(1);
+            else if (hasPath(3, 'horizontal')) announceRoundWin(2);
         }
 
-        function announceWin(team) {
+        function announceRoundWin(teamNum) {
             isLocked = true;
-            if(team === 1) score1++; else score2++;
+            const winnerName = teamNum === 1 ? team1Name : team2Name;
+            if(teamNum === 1) score1++; else score2++;
+            
             document.getElementById('score1').innerText = `${score1} فوز`;
             document.getElementById('score2').innerText = `${score2} فوز`;
 
-            if(score1 === 2 || score2 === 2) {
+            if (score1 === 2 || score2 === 2) {
+                // الفوز النهائي بالمسابقة
                 const audio = document.getElementById('final-win-audio');
                 audio.play();
-                const over = document.getElementById('win-overlay');
-                document.getElementById('winner-name-display').innerText = team === 1 ? "فريق اثنين (الأخضر)" : "فريق واحد (البرتقالي)";
-                over.classList.add('show-win');
-                startFireWorks();
-                setTimeout(() => { location.reload(); }, 11000);
+                showWinOverlay("🏆 بطل المسابقة 🏆", winnerName, 11000);
+                startContinuousFireWorks(11000);
+                setTimeout(() => location.reload(), 11500);
             } else {
-                setTimeout(() => { roundIdx++; isLocked = false; clearBoard(); }, 3000);
+                // فوز بجولة واحدة
+                showWinOverlay(`الفائز بالجولة ${roundIdx}`, winnerName, 4000);
+                setTimeout(() => {
+                    roundIdx++;
+                    document.getElementById('round-label').innerText = roundIdx === 3 ? "الجولة الفاصلة" : `الجولة ${roundIdx}`;
+                    isLocked = false;
+                    renderGrid(); // إعادة ترتيب الحروف عشوائياً للجولة التالية
+                }, 4000);
             }
+        }
+
+        function showWinOverlay(main, sub, duration) {
+            const ov = document.getElementById('win-overlay');
+            document.getElementById('win-msg-main').innerText = main;
+            document.getElementById('win-msg-sub').innerText = sub;
+            ov.classList.add('show-overlay');
+            setTimeout(() => ov.classList.remove('show-overlay'), duration);
+        }
+
+        function startContinuousFireWorks(ms) {
+            var end = Date.now() + ms;
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
         }
 
         function hasPath(target, dir) {
@@ -223,19 +236,8 @@
             return offsets.map(([dr, dc]) => [r + dr, c + dc]).filter(([nr, nc]) => nr >= 0 && nr < 5 && nc >= 0 && nc < 5);
         }
 
-        function shuffleGrid() { renderGrid(); }
-        function clearBoard() { document.querySelectorAll('.hexagon').forEach(h => { h.className = 'hexagon'; h.dataset.state = 0; }); }
-
-        function startFireWorks() {
-            var duration = 11 * 1000; var end = Date.now() + duration;
-            (function frame() {
-                confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } });
-                confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } });
-                if (Date.now() < end) requestAnimationFrame(frame);
-            }());
-        }
-
-        renderGrid();
+        function shuffleGrid() { if(!isLocked) renderGrid(); }
+        function clearBoard() { document.querySelectorAll('.hexagon').forEach(h => { h.className = 'hexagon'; h.dataset.state = "0"; }); }
     </script>
 </body>
 </html>
