@@ -19,8 +19,13 @@
             gap: 20px; padding: 20px; max-width: 1400px; margin: 0 auto;
         }
 
+        /* تعديل خلفية اللوحة: أخضر فوق وتحت، وبرتقالي في المنتصف */
         .board-wrapper {
-            background: linear-gradient(45deg, #16a34a 50%, #f97316 50%);
+            background: linear-gradient(to bottom, 
+                #16a34a 0%, #16a34a 25%, 
+                #f97316 25%, #f97316 75%, 
+                #16a34a 75%, #16a34a 100%
+            );
             padding: 30px; border-radius: 20px; border: 8px solid #facc15;
             display: flex; justify-content: center; align-items: center;
             box-shadow: 0 20px 50px rgba(0,0,0,0.3); position: relative;
@@ -39,8 +44,8 @@
         }
 
         .state-1 { background: #facc15 !important; color: black; } 
-        .state-2 { background: #22c55e !important; color: white; } /* أخضر */
-        .state-3 { background: #f97316 !important; color: white; } /* برتقالي */
+        .state-2 { background: #22c55e !important; color: white; } /* أخضر (عمودي) */
+        .state-3 { background: #f97316 !important; color: white; } /* برتقالي (أفقي) */
 
         .question-box {
             background: linear-gradient(to bottom, #ef4444, #b91c1c);
@@ -73,7 +78,7 @@
     <div id="setup-screen" class="fixed inset-0 z-[4000] bg-[#0a0412] flex items-center justify-center p-4">
         <div class="bg-white/10 backdrop-blur-3xl p-10 rounded-[3rem] border border-white/20 text-center w-full max-w-md shadow-2xl">
             <h1 class="text-3xl font-black text-yellow-500 mb-6">إعداد المسابقة</h1>
-            <input type="text" id="game-title-input" placeholder="اسم المسابقة (مثلاً: حروف مع منصور)" class="w-full p-4 mb-4 rounded-2xl bg-black/60 border border-white/20 text-white text-center outline-none">
+            <input type="text" id="game-title-input" placeholder="اسم المسابقة" class="w-full p-4 mb-4 rounded-2xl bg-black/60 border border-white/20 text-white text-center outline-none">
             <div class="grid grid-cols-2 gap-4 mb-8">
                 <input type="text" id="team1-name-input" value="الفريق الأخضر" class="p-3 rounded-xl bg-green-900/40 border border-green-500 text-white text-center font-bold">
                 <input type="text" id="team2-name-input" value="الفريق البرتقالي" class="p-3 rounded-xl bg-orange-900/40 border border-orange-500 text-white text-center font-bold">
@@ -179,20 +184,18 @@
             document.getElementById('score2').innerText = `${score2} فوز`;
 
             if (score1 === 2 || score2 === 2) {
-                // الفوز النهائي بالمسابقة
                 const audio = document.getElementById('final-win-audio');
                 audio.play();
                 showWinOverlay("🏆 بطل المسابقة 🏆", winnerName, 11000);
                 startContinuousFireWorks(11000);
                 setTimeout(() => location.reload(), 11500);
             } else {
-                // فوز بجولة واحدة
                 showWinOverlay(`الفائز بالجولة ${roundIdx}`, winnerName, 4000);
                 setTimeout(() => {
                     roundIdx++;
                     document.getElementById('round-label').innerText = roundIdx === 3 ? "الجولة الفاصلة" : `الجولة ${roundIdx}`;
                     isLocked = false;
-                    renderGrid(); // إعادة ترتيب الحروف عشوائياً للجولة التالية
+                    renderGrid();
                 }, 4000);
             }
         }
