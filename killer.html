@@ -26,7 +26,6 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden;
         }
 
         .container {
@@ -38,10 +37,9 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.8);
             border: 1px solid #333;
             text-align: center;
-            z-index: 10;
         }
 
-        h1 { font-size: 2.2em; color: var(--secondary); margin-bottom: 20px; text-shadow: 0 5px 15px rgba(236, 204, 104, 0.2); }
+        h1 { font-size: 2.2em; color: var(--secondary); margin-bottom: 20px; }
 
         .setup, .game-area, .win-screen { display: none; }
         .active { display: block; }
@@ -55,12 +53,12 @@
         button {
             padding: 15px 25px; cursor: pointer; background: var(--primary);
             color: white; border: none; border-radius: 15px; font-weight: bold;
-            transition: 0.2s; box-shadow: 0 4px 0 #b33939;
+            transition: 0.2s; box-shadow: 0 4px 0 #b33939; margin: 5px;
         }
         button:active { transform: translateY(3px); box-shadow: 0 0px 0 #b33939; }
 
         .score-board { display: flex; gap: 15px; margin-bottom: 20px; }
-        .team-box { flex: 1; padding: 15px; border-radius: 20px; background: #25252d; border: 3px solid transparent; transition: 0.4s; }
+        .team-box { flex: 1; padding: 15px; border-radius: 20px; background: #25252d; border: 3px solid transparent; }
         .team-box.active-turn { border-color: var(--secondary); background: #2d2d3a; transform: scale(1.02); }
         .points { font-size: 2.2em; display: block; color: var(--secondary); font-weight: 900; }
 
@@ -71,21 +69,17 @@
         .lvl-20 { background: #ffa502; box-shadow: 0 4px 0 #cc8400; }
         .lvl-30 { background: #8258fa; box-shadow: 0 4px 0 #5f3dc4; }
 
-        .story-box { background: #fff; color: #2c3e50; padding: 25px; border-radius: 25px; text-align: right; margin: 20px 0; line-height: 1.7; font-size: 1.15em; }
+        .story-box { background: #fff; color: #2c3e50; padding: 25px; border-radius: 25px; text-align: right; margin: 20px 0; line-height: 1.7; }
         .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px; }
-        .opt-btn { background: #34495e; box-shadow: 0 4px 0 #2c3e50; }
+        .opt-btn { background: #34495e; color: white; }
 
-        .hint-text { background: #fff9db; color: #856404; padding: 12px; margin: 10px 0; border-radius: 12px; display: none; border-right: 5px solid #fab005; font-weight: bold; }
-        .explanation { margin-top: 15px; padding: 15px; border-radius: 15px; display: none; font-weight: bold; }
-
-        /* شاشة الفوز */
-        .win-screen h2 { font-size: 3em; color: var(--secondary); margin-bottom: 10px; }
-        .win-screen p { font-size: 1.5em; color: #fff; }
+        .hint-text { background: #fff9db; color: #856404; padding: 12px; margin: 10px 0; border-radius: 12px; display: none; border-right: 5px solid #fab005; }
+        .explanation { margin-top: 15px; padding: 15px; border-radius: 15px; display: none; color: white; background: #2ecc71; }
     </style>
 </head>
 <body>
 
-<div class="container animate__animated animate__fadeIn">
+<div class="container">
     <h1>🕵️‍♂️ من القاتل لعيون أحمد 🕵️‍♀️</h1>
 
     <div id="setup" class="setup active">
@@ -107,7 +101,7 @@
             </div>
         </div>
 
-        <div id="levels" class="animate__animated animate__fadeInUp">
+        <div id="levels">
             <h3>اختر مستوى القضية:</h3>
             <button class="level-btn lvl-10" onclick="loadStory(10)">جُنحة (10 ن)</button>
             <button class="level-btn lvl-20" onclick="loadStory(20)">جريمة غامضة (20 ن)</button>
@@ -115,18 +109,18 @@
         </div>
 
         <div id="storyDisplay" style="display:none;">
-            <div class="story-box animate__animated animate__zoomIn">
+            <div class="story-box">
                 <div id="storyText"></div>
                 <div id="hintArea" class="hint-text"></div>
                 <div id="options" class="options-grid"></div>
             </div>
-            <button id="hintBtn" style="background:#f39c12; box-shadow: 0 4px 0 #d35400;" onclick="useHint()">💡 طلب تلميح</button>
+            <button id="hintBtn" onclick="useHint()">💡 طلب تلميح (-5ن)</button>
             <div id="explanation" class="explanation"></div>
             <br><button id="nextBtn" style="display:none; width:100%" onclick="resetTurn()">القضية التالية ⬅️</button>
         </div>
     </div>
 
-    <div id="winScreen" class="win-screen animate__animated animate__bounceIn">
+    <div id="winScreen" class="win-screen">
         <h2>مبروك لـ <span id="winnerName"></span>! 🎉</h2>
         <p>يا أطلق محققين في العالم 🕵️‍♂️🔥</p>
         <br><button onclick="location.reload()">لعب مرة أخرى</button>
@@ -134,8 +128,14 @@
 </div>
 
 <script>
+    let scores = [0, 0];
+    let currentTeam = 0;
+    let currentPoints = 0;
+    let teams = ["", ""];
+    let usedHint = false;
+
     const allStories = {
-    10: [
+        10: [
     { q: "رجل مقتول في غرفته يوم الأحد. الخادم قال كان يجمع البريد، الزوجة قالت كانت نائمة، الطباخ قال يجهز غداء الإثنين. من القاتل؟", options: ["الخادم", "الزوجة", "الطباخ"], ans: 0, hint: "هل يوجد توزيع بريد يوم الأحد؟", why: "الخادم؛ لأنه لا يوجد توزيع بريد رسمي في أيام الآحاد." },
     { q: "وُجدت جثة في غابة مطيرة. المشتبه به قال إنه كان يشعل ناراً بحطب جاف وجده بالأرض. لماذا قبضوا عليه؟", options: ["لأن النار ممنوعة", "الغابة المطيرة حطبها دائماً مبلل والرطوبة تمنع وجود خشب جاف تماماً", "لأنه لا يملك ولاعة"], ans: 1, hint: "فكر في طبيعة الغابة 'المطيرة'.", why: "في الغابات المطيرة الرطوبة عالية جداً ومن المستحيل العثور على حطب جاف بالأرض." },
     { q: "مات شخص في مكتبه والكهرباء مقطوعة. ادعى السكرتير أنه كان يصور أوراقاً هامة لحظة الوفاة. لماذا هو كاذب؟", options: ["لأن الأوراق سرية", "آلة التصوير لا تعمل بدون كهرباء", "لأن المكتب مظلم"], ans: 1, hint: "الكهرباء مقطوعة..", why: "ادعى استخدام آلة التصوير والكهرباء مقطوعة، وهذا مستحيل تقنياً." },
@@ -187,7 +187,7 @@
     { q: "ادعى مشتبه به أنه رأى الجريمة عبر 'ثقب مفتاح' الباب والباب كان 'مفتوحاً' بالكامل. لماذا هو كاذب؟", options: ["الباب قديم", "لا تنظر عبر ثقب المفتاح إذا كان الباب مفتوحاً أمامك", "ثقب المفتاح صغير"], ans: 1, hint: "منطق الفعل.", why: "فعل غير منطقي يثبت التوتر والكذب." },
     { q: "رجل مقتول في مكتبه. المشتبه به قال كنت 'أرتب الكتب' والكتب كانت 'مبعثرة ومقلوبة' على الأرض. لماذا قبضوا عليه؟", options: ["الكتب قديمة", "حالة الكتب تخالف ادعاء الترتيب", "المكتب واسع"], ans: 1, hint: "حالة المكان.", why: "التناقض بين الادعاء والواقع البصري للمكان." }
 ]
-    20: [
+        20: [
     { q: "وُجد رجل مقتولاً في شقته بالدور الـ 20. وُجدت بجانبه نبتة طبيعية مبعثرة، وأوراقها مائلة باتجاه 'النافذة'. المشتبه به قال إن الضحية سقط عليها 'للتو'. لماذا كُشف؟", options: ["لأن النبتة ماتت", "ميلان الأوراق للضوء يستغرق أياماً؛ بقاء الميلان للنافذة رغم بعثرة الأصيص يعني أنه نُقل حديثاً لتمويه المكان", "الزرع لا يكسر الشخص"], ans: 1, hint: "النبات يتجه للضوء ببطء شديد.", why: "لو سقط الضحية فعلاً لبعثر الأوراق في اتجاهات عشوائية؛ بقاء اتجاه ميلان الأوراق للنافذة يعني أن القاتل رتب المشهد بعد نقل الأصيص." },
     { q: "وُجدت جثة في مسبح دافئ. المشتبه به قال إنه حاول إنقاذه وعمل له تنفس صناعي. المحقق لاحظ أن وجه الضحية كان 'أزرقاً شاحباً' وبارداً، وملابس المشتبه به مبللة بماء 'بارد'. لماذا قبضوا عليه؟", options: ["لأن الماء دافئ", "التناقض بين برودة الضحية وبلل القاتل البارد يعني أن الجريمة تمت في مكان بارد ونقل للمسبح الدافئ", "التنفس الصناعي خطأ"], ans: 1, hint: "قارن حرارة المسبح بالبلل على ملابس المشتبه به.", why: "المسبح دافئ، وجود ماء بارد على ملابس القاتل يثبت أنه غطس في مكان آخر بارد لقتل الضحية ثم نقله." },
     { q: "ادعى شخص أن لصاً كسر زجاج نافذة المتجر من 'الخارج' ودخل. المحقق وجد معظم الزجاج المتناثر 'خارج' المتجر على الرصيف. لماذا اتهمه؟", options: ["الزجاج حاد", "الكسر من الخارج يدفع الزجاج للداخل حتماً؛ وجوده بالخارج يعني الكسر تم من الداخل", "لأن اللص هرب"], ans: 1, hint: "فيزيائياً، أين تسقط الشظايا عند ضرب الزجاج؟", why: "قوة الضربة تدفع الزجاج في اتجاهها. سقوط الزجاج في الشارع يعني أن القاتل ضربه من داخل المحل للخارج." },
@@ -239,7 +239,7 @@
     { q: "وُجدت جثة في مطبخ. المشتبه به قال كنت 'أطبخ السمك' ولم أشم رائحة الغاز المتسرب. لماذا قبضوا عليه؟", options: ["السمك لذيذ", "الطبخ يتطلب إشعال نار، ولو تسرب الغاز لحدث انفجار فور إشعال الموقد", "لأن الرائحة قوية"], ans: 1, hint: "تفاعل النار مع الغاز المتسرب.", why: "كذبة خطيرة؛ وجود غاز مع طبخ يعني انفجاراً محققاً، عدم حدوثه يعني عدم وجود تسرب أو عدم وجود طبخ." },
     { q: "مات شخص بجرعة سم 'سكر'. المشتبه به قال الضحية 'مريض سكر' ومات طبيعياً. لماذا اتهم؟", options: ["السكر لذيذ", "مريض السكر لا يموت بجرعة سكر واحدة مفاجئة إلا إذا حُقن بها عمداً بتركيز عالٍ جداً", "لأن الضحية نحيف"], ans: 1, hint: "الفرق بين الموت الطبيعي والحقن العمد.", why: "استغلال الحالة الطبية للضحية لتنفيذ جريمة قتل كيميائية." }
 ]
-   30: [ // مستوى 30 نقطة - قضية محنكة (50 سؤال من العيار الثقيل)
+        30: [ // مستوى 30 نقطة - قضية محنكة (50 سؤال من العيار الثقيل)
     { q: "عالم فيزياء مقتول في مختبره، ترك رسالة مكتوب فيها الرقم '1.008'. المشتبه بهم: 'هاني'، 'ليث'، 'هيدروجين'. من القاتل؟", options: ["هاني", "ليث", "هيدروجين"], ans: 2, hint: "ابحث عن الرقم في الجدول الدوري.", why: "الرقم 1.008 هو الوزن الذري للهيدروجين؛ الضحية استخدم علمه ليترك دليلاً لا يفهمه إلا القاتل." },
     { q: "ادعى طيار أن لصاً فتح باب الطائرة وقفز أثناء الطيران على ارتفاع 30 ألف قدم. لماذا كذبه المحقق فوراً؟", options: ["بسبب شدة الرياح", "بسبب فرق الضغط الجوي الهائل الذي يجعل فتح الباب للخارج مستحيلاً يدوياً", "لأن الباب ثقيل"], ans: 1, hint: "الضغط الداخلي أقوى بآلاف المرات من الخارجي.", why: "عند الارتفاعات العالية، يضغط الهواء الداخلي على الباب بقوة هائلة تجعله كأنه ملحوم، مستحيل فتحه بشرياً." },
     { q: "وُجد جراح مقتولاً وبجانبه رسالة: 'نقص الأكسجين'. المشتبه بهم: الممرض 'أزرق'، الفني 'كربون'، الطبيب 'بنج'. من القاتل؟", options: ["أزرق", "كربون", "بنج"], ans: 1, hint: "ما هو الغاز الذي يمنع وصول الأكسجين للدم؟", why: "غاز أول أكسيد الكربون يقتل بالحلول محل الأكسجين؛ الضحية أشار للقاتل بلقبه العلمي." },
@@ -290,107 +290,100 @@
     { q: "وُجدت جثة في مختبر كيمياء. الضحية كتب 'K'. المشتبه بهم: 'كريم'، 'كمال'، 'بوتاسيوم'. من القاتل؟", options: ["كريم", "كمال", "بوتاسيوم"], ans: 2, hint: "ما هو الرمز الكيميائي لعنصر البوتاسيوم؟", why: "K هو الرمز الكيميائي للبوتاسيوم (Kalium) في الجدول الدوري." },
     { q: "مات شخص بصدمة 'حساسية'. المشتبه به قال 'أكل فراولة بالخطأ'. المحقق وجد أن الضحية 'ليس لديه معدة' (مستأصلة ويأكل عبر أنبوب). لماذا قبض عليه؟", options: ["الفراولة حامضة", "الشخص الذي يتغذى عبر أنبوب لا يتذوق أو يأكل 'بالخطأ'؛ القاتل وضع مادة الحساسية في محلول التغذية", "لأن الفراولة غالية"], ans: 1, hint: "كيف يتغذى من استأصل معدته؟", why: "القاتل استخدم عذراً يناسب الأشخاص الطبيعيين ونسي الحالة الطبية الخاصة للضحية." },
     { q: "ادعى شاهد أنه رأى القاتل يهرب 'بسرعة الصوت'. لماذا اتهمه المحقق؟", options: ["لأنه يمزح", "سرعة الصوت تسبب 'انفجاراً صوتياً' يحطم النوافذ؛ عدم حدوث ذلك يعني أن الشاهد يبالغ لتغطية الحقيقة", "لأن القاتل بطيء"], ans: 1, hint: "ماذا يحدث عند كسر حاجز الصوت؟", why: "الفيزياء الموجية؛ الحركة بسرعة الصوت لها آثار تدميرية مسموعة ومرئية لا يمكن تجاهلها." }
-]مستوى 30 نقطة (50 قصة - قضية محنكة)
-};
-
-    let used = new Set(), scores = { t1: 0, t2: 0 }, currentTeam = 1, currentStory = null, hintUsed = false;
+]
+    };
 
     function startGame() {
-        document.getElementById('nameT1').innerText = document.getElementById('t1').value || "فريق أ";
-        document.getElementById('nameT2').innerText = document.getElementById('t2').value || "فريق ب";
+        teams[0] = document.getElementById('t1').value || "الفريق الأول";
+        teams[1] = document.getElementById('t2').value || "الفريق الثاني";
+        document.getElementById('nameT1').innerText = teams[0];
+        document.getElementById('nameT2').innerText = teams[1];
         document.getElementById('setup').classList.remove('active');
         document.getElementById('gameArea').classList.add('active');
         updateTurn();
     }
 
     function updateTurn() {
-        const name = currentTeam === 1 ? document.getElementById('nameT1').innerText : document.getElementById('nameT2').innerText;
-        document.getElementById('turnTag').innerText = "دور فريق: " + name;
+        document.getElementById('turnTag').innerText = "دور فريق: " + teams[currentTeam];
+        document.getElementById('box1').className = currentTeam === 0 ? "team-box active-turn" : "team-box";
+        document.getElementById('box2').className = currentTeam === 1 ? "team-box active-turn" : "team-box";
     }
 
     function loadStory(pts) {
-        let avail = allStories[pts].filter(s => !used.has(s.q));
-        if (!avail.length) return alert("انتهت الأسئلة!");
-        currentStory = avail[Math.floor(Math.random() * avail.length)];
-        used.add(currentStory.q);
-        currentStory.basePoints = pts;
-        hintUsed = false;
-        document.getElementById('storyText').innerText = currentStory.q;
-        document.getElementById('hintArea').style.display = "none";
-        document.getElementById('explanation').style.display = "none";
-        document.getElementById('nextBtn').style.display = "none";
-        document.getElementById('hintBtn').style.display = "inline-block";
-        const optDiv = document.getElementById('options');
-        optDiv.innerHTML = "";
-        currentStory.options.forEach((o, i) => {
-            const b = document.createElement('button');
-            b.className = "opt-btn"; b.innerText = o;
-            b.onclick = () => check(i);
-            optDiv.appendChild(b);
-        });
+        currentPoints = pts;
+        usedHint = false;
+        const stories = allStories[pts];
+        const story = stories[Math.floor(Math.random() * stories.length)];
+        
         document.getElementById('levels').style.display = "none";
         document.getElementById('storyDisplay').style.display = "block";
+        document.getElementById('storyText').innerText = story.q;
+        document.getElementById('hintArea').innerText = story.hint;
+        document.getElementById('hintArea').style.display = "none";
+        document.getElementById('explanation').style.display = "none";
+        
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = "";
+        story.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = "opt-btn";
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(index, story.ans, story.why);
+            optionsDiv.appendChild(btn);
+        });
     }
 
     function useHint() {
-        hintUsed = true;
-        document.getElementById('hintArea').innerText = "💡 تلميح: " + currentStory.hint;
-        document.getElementById('hintArea').style.display = "block";
-        document.getElementById('hintBtn').style.display = "none";
+        if (!usedHint) {
+            usedHint = true;
+            document.getElementById('hintArea').style.display = "block";
+            scores[currentTeam] = Math.max(0, scores[currentTeam] - 5);
+            updateScores();
+        }
     }
 
-    function check(idx) {
+    function checkAnswer(chosen, correct, why) {
         const exp = document.getElementById('explanation');
         exp.style.display = "block";
-        document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
-        let win = (idx === currentStory.ans);
-        if(win) {
-            let p = hintUsed ? currentStory.basePoints/2 : currentStory.basePoints;
-            if(currentTeam === 1) scores.t1 += p; else scores.t2 += p;
-            exp.innerHTML = "✅ صح! <br><small>" + currentStory.why + "</small>";
-            exp.style.background = "var(--success)";
-        } else {
-            exp.innerHTML = "❌ خطأ! القاتل: " + currentStory.options[currentStory.ans] + "<br><small>" + currentStory.why + "</small>";
-            exp.style.background = "var(--error)";
-        }
-        document.getElementById('s1').innerText = scores.t1;
-        document.getElementById('s2').innerText = scores.t2;
         
-        if (scores.t1 >= 100 || scores.t2 >= 100) {
-            showWinner();
+        if (chosen === correct) {
+            exp.style.background = "#2ecc71";
+            exp.innerText = "صح! ✅ " + why;
+            scores[currentTeam] += currentPoints;
+            confetti();
         } else {
-            document.getElementById('nextBtn').style.display = "inline-block";
+            exp.style.background = "#e74c3c";
+            exp.innerText = "خطأ! ❌ " + why;
+        }
+        
+        updateScores();
+        document.getElementById('nextBtn').style.display = "block";
+        document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+        
+        if (scores[currentTeam] >= 100) {
+            setTimeout(showWin, 2000);
         }
     }
 
-    function showWinner() {
-        const winner = scores.t1 >= 100 ? document.getElementById('nameT1').innerText : document.getElementById('nameT2').innerText;
-        document.getElementById('gameArea').style.display = "none";
-        document.getElementById('winScreen').style.display = "block";
-        document.getElementById('winnerName').innerText = winner;
-        
-        // تأثير الاحتفال
-        var duration = 5 * 1000;
-        var animationEnd = Date.now() + duration;
-        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-        function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-        var interval = setInterval(function() {
-            var timeLeft = animationEnd - Date.now();
-            if (timeLeft <= 0) return clearInterval(interval);
-            var particleCount = 50 * (timeLeft / duration);
-            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-        }, 250);
+    function updateScores() {
+        document.getElementById('s1').innerText = scores[0];
+        document.getElementById('s2').innerText = scores[1];
     }
 
     function resetTurn() {
-        currentTeam = currentTeam === 1 ? 2 : 1;
-        document.getElementById('box1').classList.toggle('active-turn');
-        document.getElementById('box2').classList.toggle('active-turn');
-        updateTurn();
+        currentTeam = currentTeam === 0 ? 1 : 0;
         document.getElementById('levels').style.display = "block";
         document.getElementById('storyDisplay').style.display = "none";
+        document.getElementById('nextBtn').style.display = "none";
+        updateTurn();
+    }
+
+    function showWin() {
+        document.getElementById('gameArea').classList.remove('active');
+        document.getElementById('winScreen').classList.add('active');
+        document.getElementById('winnerName').innerText = teams[currentTeam];
     }
 </script>
+
 </body>
 </html>
