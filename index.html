@@ -3,228 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مسابقة حروف - نسخة البطل</title>
+    <title>حروف مع منصور</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Tajawal', sans-serif; background: #0a0412; color: white; overflow: hidden; height: 100vh; margin: 0; }
-        
-        .game-area-wrapper {
-            position: relative; padding: 40px; border-radius: 40px;
-            background: linear-gradient(to bottom, #166534 0%, #00FF41 10%, #5c2800 25%, #FF6A00 40%, #FF6A00 60%, #5c2800 75%, #00FF41 90%, #166534 100%);
-            box-shadow: 0 0 80px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
+        body { 
+            font-family: 'Tajawal', sans-serif; 
+            background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); 
+            min-height: 100vh; color: white; margin: 0; overflow-x: hidden;
         }
 
-        .hex-grid { display: flex; flex-direction: column; align-items: center; gap: 0px; }
-        .hex-row { display: flex; gap: 1px; margin-bottom: -25px; }
-        .hex-row:nth-child(even) { transform: translateX(48px); }
+        /* حاوية اللعبة الرئيسية */
+        .game-container {
+            display: grid;
+            grid-template-columns: 1fr 300px 320px;
+            gap: 20px; padding: 20px; max-width: 1400px; margin: 0 auto;
+        }
+
+        /* خلية النحل - خلفية الألوان المتقاطعة */
+        .board-wrapper {
+            background: linear-gradient(45deg, #16a34a 50%, #f97316 50%);
+            padding: 30px; border-radius: 20px; border: 8px solid #facc15;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .hex-grid { display: flex; flex-direction: column; align-items: center; }
+        .hex-row { display: flex; margin-bottom: -18px; }
+        .hex-row:nth-child(even) { transform: translateX(33px); }
 
         .hexagon {
-            width: 95px; height: 110px; background: #1e1135;
+            width: 65px; height: 75px; background: white;
             clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s ease;
-            font-size: 3.2rem; font-weight: 900; user-select: none; color: white;
-            filter: drop-shadow(2.5px 0 0 white) drop-shadow(-2.5px 0 0 white) drop-shadow(0 2.5px 0 white) drop-shadow(0 -2.5px 0 white);
+            cursor: pointer; transition: 0.2s; font-size: 1.8rem; font-weight: 900;
+            color: #312e81; margin: 2px;
         }
 
-        .state-0 { background: #1e1135; } 
-        .state-1 { background: #FFD700; color: #000; z-index: 10; filter: drop-shadow(0 0 15px #FFD700); } 
-        .state-2 { background: #00FF41; color: white; z-index: 10; filter: drop-shadow(0 0 20px #00FF41); } 
-        .state-3 { background: #FF6A00; color: white; z-index: 10; filter: drop-shadow(0 0 20px #FF6A00); }
+        /* حالات الألوان */
+        .state-1 { background: #facc15; color: black; box-shadow: 0 0 15px #facc15; }
+        .state-2 { background: #22c55e; color: white; }
+        .state-3 { background: #f97316; color: white; }
 
-        .overlay-layer {
-            position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-            z-index: 2000; pointer-events: none; visibility: hidden; background: rgba(0,0,0,0.92); text-align: center;
+        /* منطقة السؤال */
+        .question-box {
+            background: linear-gradient(to bottom, #ef4444, #b91c1c);
+            border-radius: 30px; padding: 30px; text-align: center;
+            display: flex; flex-direction: column; justify-content: space-between;
+            border: 4px solid rgba(255,255,255,0.2);
         }
-        
-        /* تأثير ظهور الرسالة */
-        @keyframes finalWinAnim {
-            0% { transform: scale(0.5); opacity: 0; }
-            10% { transform: scale(1.1); opacity: 1; }
-            90% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1); opacity: 0; visibility: hidden; }
-        }
-        
-        /* أنيميشن خاص بـ 11 ثانية للبطل */
-        .animate-final { visibility: visible; animation: finalWinAnim 11s forwards; }
-        
-        /* أنيميشن الجولات العادية (4 ثواني) */
-        @keyframes roundAnim {
-            0% { transform: scale(0); opacity: 0; }
-            20% { transform: scale(1.1); opacity: 1; }
-            80% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1); opacity: 0; visibility: hidden; }
-        }
-        .animate-round { visibility: visible; animation: roundAnim 4s forwards; }
 
-        .direction-label { position: absolute; font-weight: 900; font-size: 0.9rem; text-shadow: 0 0 10px #000; color: white; }
-        .dir-top { top: 10px; left: 50%; transform: translateX(-50%); }
-        .dir-bottom { bottom: 10px; left: 50%; transform: translateX(-50%); }
-        .dir-right { right: -25px; top: 50%; transform: translateY(-50%) rotate(90deg); }
-        .dir-left { left: -25px; top: 50%; transform: translateY(-50%) rotate(-90deg); }
+        /* القائمة الجانبية */
+        .side-menu { display: flex; flex-direction: column; gap: 15px; }
+        .score-card { border-radius: 20px; padding: 15px; text-align: center; font-weight: 900; }
+        .btn-side { 
+            background: rgba(255,255,255,0.2); backdrop-blur: md; 
+            padding: 15px; border-radius: 15px; text-align: right;
+            display: flex; align-items: center; gap: 10px; transition: 0.3s;
+        }
+        .btn-side:hover { background: rgba(255,255,255,0.3); }
+
+        /* الشاشات الصغيرة */
+        @media (max-width: 1024px) {
+            .game-container { grid-template-columns: 1fr; }
+            .side-menu { order: 3; }
+            .board-wrapper { order: 1; }
+            .question-box { order: 2; min-height: 250px; }
+            .hex-row { margin-bottom: -12px; }
+            .hexagon { width: 50px; height: 58px; font-size: 1.4rem; }
+            .hex-row:nth-child(even) { transform: translateX(26px); }
+        }
+
+        /* طبقة الفوز */
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1000; text-align: center;
+        }
+        .show-win { display: flex; animation: fadeIn 0.5s; }
     </style>
 </head>
-<body class="flex">
+<body>
 
-    <div id="msg-overlay" class="overlay-layer">
-        <div class="flex flex-col items-center">
-            <h1 id="msg-text" class="text-7xl font-black text-yellow-400 italic leading-tight px-10"></h1>
-            <p id="sub-msg" class="text-4xl mt-6 text-white font-bold"></p>
+    <header class="p-4 flex justify-between items-center bg-black/10">
+        <div class="flex gap-3">
+            <button onclick="location.reload()" class="bg-purple-600 px-4 py-2 rounded-full text-sm font-bold">لعبة جديدة</button>
+            <button class="bg-blue-600 px-4 py-2 rounded-full text-sm font-bold">طريقة اللعبة</button>
         </div>
-    </div>
+        <div class="text-xl font-black text-yellow-400">حروف مع <span id="user-name">منصور</span></div>
+    </header>
 
-    <div id="setup" class="fixed inset-0 z-[2100] bg-[#0a0412] flex items-center justify-center p-4">
-        <div class="bg-white/10 backdrop-blur-3xl p-10 rounded-[3rem] border border-white/20 text-center w-full max-w-md shadow-2xl">
-            <h1 class="text-4xl font-black text-yellow-500 mb-8 underline decoration-double">إعداد المسابقة</h1>
-            <input type="text" id="game-name-input" placeholder="اسم المسابقة" class="w-full p-4 mb-4 rounded-2xl bg-black/60 border border-white/20 text-white text-center text-xl outline-none">
-            <div class="grid grid-cols-2 gap-4 mb-10">
-                <input type="text" id="t1-in" value="الفريق الأخضر" class="p-3 rounded-xl bg-green-900/40 border border-green-500 text-white text-center font-bold">
-                <input type="text" id="t2-in" value="الفريق البرتقالي" class="p-3 rounded-xl bg-orange-900/40 border border-orange-500 text-white text-center font-bold">
-            </div>
-            <button onclick="initiate()" class="w-full bg-yellow-500 text-black font-black py-5 rounded-2xl text-2xl hover:scale-105 transition">ابدأ المسابقة</button>
-        </div>
-    </div>
-
-    <aside class="w-80 bg-black/80 backdrop-blur-xl p-6 flex flex-col gap-6 border-l border-white/10 z-50">
-        <div id="display-title" class="text-2xl font-black text-yellow-500 text-center py-4 border-b border-white/10 italic">حروف</div>
-        <div class="space-y-4">
-            <div class="p-4 bg-green-600/20 border border-green-500 rounded-2xl text-center">
-                <p id="t1-label" class="font-bold text-green-400 text-xl truncate">الفريق الأخضر</p>
-                <div class="text-6xl font-black my-2 text-white" id="score1">0</div>
-            </div>
-            <div class="p-4 bg-orange-600/20 border border-orange-500 rounded-2xl text-center">
-                <p id="t2-label" class="font-bold text-orange-400 text-xl truncate">الفريق البرتقالي</p>
-                <div class="text-6xl font-black my-2 text-white" id="score2">0</div>
-            </div>
-        </div>
-        <button onclick="shuffleGrid()" class="w-full bg-blue-600 py-4 rounded-xl font-bold mt-auto hover:bg-blue-500 transition">🔄 خلط الحروف</button>
-        <button onclick="location.reload()" class="w-full bg-red-900/40 border border-red-500 py-3 rounded-xl font-bold text-red-400">إعادة تعيين المسابقة</button>
-    </aside>
-
-    <main class="flex-1 flex items-center justify-center p-4">
-        <div class="game-area-wrapper">
-            <div class="direction-label dir-top">بداية (↕)</div>
-            <div class="direction-label dir-bottom">هدف (↕)</div>
-            <div class="direction-label dir-right">بداية (↔)</div>
-            <div class="direction-label dir-left">هدف (↔)</div>
+    <div class="game-container">
+        
+        <div class="board-wrapper">
             <div id="grid-main" class="hex-grid"></div>
         </div>
-    </main>
 
-    <audio id="final-win-audio" src="https://raw.githubusercontent.com/iMans9/mp3/refs/heads/main/win.mp3"></audio>
+        <div class="question-box">
+            <div class="bg-white/20 w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl font-black mb-4" id="current-letter">-</div>
+            <div class="text-sm opacity-80 mb-2">السؤال</div>
+            <div class="text-xl font-bold leading-relaxed" id="question-text">اضغط على حرف لبدء السؤال..</div>
+            <button class="mt-8 bg-white/20 py-3 rounded-full font-black hover:bg-white/30 transition">اضغط للإجابة</button>
+        </div>
+
+        <div class="side-menu">
+            <div class="text-center font-black mb-2 flex items-center justify-center gap-2">
+                <span>🏆</span> لوحة النتائج
+            </div>
+            
+            <div class="score-card bg-orange-600">
+                <div class="text-lg">فريق واحد</div>
+                <div class="text-4xl" id="score2">0 فوز</div>
+            </div>
+
+            <div class="score-card bg-green-600">
+                <div class="text-lg">فريق اثنين</div>
+                <div class="text-4xl" id="score1">0 فوز</div>
+            </div>
+
+            <button onclick="shuffleGrid()" class="btn-side text-purple-200">
+                <span>🎲</span> توزيع عشوائي
+            </button>
+            <button onclick="clearBoard()" class="btn-side text-red-300">
+                <span>🗑️</span> تفريغ اللوحة
+            </button>
+            <button class="btn-side text-blue-200">
+                <span>🎨</span> الإعدادات
+            </button>
+        </div>
+    </div>
+
+    <div id="win-overlay" class="overlay">
+        <h1 class="text-6xl font-black text-yellow-400 mb-4">🏆 بطل المسابقة 🏆</h1>
+        <h2 id="winner-name-display" class="text-4xl font-bold mb-8"></h2>
+        <p class="text-xl opacity-70">سيتم بدء جولة جديدة تلقائياً...</p>
+    </div>
+
+    <audio id="final-win-audio" src="https://raw.githubusercontent.com/iMans9/mp3/main/win.mp3"></audio>
 
     <script>
         const letters = "أبتثجحخدذرزسشصضطظعغفقلمنهوي".split("");
-        let roundIdx = 1, isLocked = false, gridData = [];
-        let score1 = 0, score2 = 0;
-
-        function initiate() {
-            document.getElementById('display-title').innerText = "حروف مع " + (document.getElementById('game-name-input').value || "منصور");
-            document.getElementById('t1-label').innerText = document.getElementById('t1-in').value;
-            document.getElementById('t2-label').innerText = document.getElementById('t2-in').value;
-            document.getElementById('setup').classList.add('hidden');
-            startNewRound();
-        }
-
-        function startNewRound() {
-            isLocked = false;
-            let msg = roundIdx === 3 ? "الجولة الفاصلة!" : `الجولة ${roundIdx}`;
-            showOverlay(msg, "استعدوا..", false);
-            renderGrid();
-        }
-
-        function showOverlay(main, sub, isFinal) {
-            const ov = document.getElementById('msg-overlay');
-            document.getElementById('msg-text').innerText = main;
-            document.getElementById('sub-msg').innerText = sub || "";
-            
-            ov.classList.remove('animate-round', 'animate-final');
-            void ov.offsetWidth;
-            
-            ov.classList.add(isFinal ? 'animate-final' : 'animate-round');
-        }
+        let score1 = 0, score2 = 0, roundIdx = 1, isLocked = false;
+        let gridData = [];
 
         function renderGrid() {
-            const grid = document.getElementById('grid-main'); grid.innerHTML = ''; gridData = [];
+            const grid = document.getElementById('grid-main');
+            grid.innerHTML = ''; gridData = [];
             let pool = [...letters].sort(() => 0.5 - Math.random()).slice(0, 25);
+            
             for (let r = 0; r < 5; r++) {
-                const row = document.createElement('div'); row.className = 'hex-row'; gridData[r] = [];
+                const row = document.createElement('div');
+                row.className = 'hex-row';
+                gridData[r] = [];
                 for (let c = 0; c < 5; c++) {
                     const hex = document.createElement('div');
-                    hex.className = 'hexagon state-0';
+                    hex.className = 'hexagon';
                     hex.innerText = pool[r * 5 + c];
-                    hex.dataset.r = r; hex.dataset.c = c; hex.dataset.state = "0";
-                    hex.onclick = () => {
-                        if(isLocked) return;
-                        let s = (parseInt(hex.dataset.state) + 1) % 4;
-                        hex.dataset.state = s; hex.className = `hexagon state-${s}`;
-                        checkWinner();
-                    };
-                    row.appendChild(hex); gridData[r][c] = hex;
+                    hex.onclick = () => handleHexClick(hex, r, c);
+                    row.appendChild(hex);
+                    gridData[r][c] = hex;
                 }
                 grid.appendChild(row);
             }
         }
 
-        function checkWinner() {
-            if (hasPath(2, 'vertical')) { processWin(1, 'الأخضر'); return; }
-            if (hasPath(3, 'horizontal')) { processWin(2, 'البرتقالي'); }
+        function handleHexClick(hex, r, c) {
+            if(isLocked) return;
+            document.getElementById('current-letter').innerText = hex.innerText;
+            let s = (parseInt(hex.dataset.state || 0) + 1) % 4;
+            hex.dataset.state = s;
+            hex.className = `hexagon state-${s}`;
+            checkWinner();
         }
 
-        function processWin(teamNum, colorStr) {
+        function checkWinner() {
+            if (hasPath(2, 'vertical')) announceWin(1);
+            else if (hasPath(3, 'horizontal')) announceWin(2);
+        }
+
+        function announceWin(team) {
             isLocked = true;
-            if(teamNum === 1) score1++; else score2++;
-            document.getElementById('score1').innerText = score1;
-            document.getElementById('score2').innerText = score2;
+            if(team === 1) score1++; else score2++;
+            document.getElementById('score1').innerText = `${score1} فوز`;
+            document.getElementById('score2').innerText = `${score2} فوز`;
 
-            const teamName = teamNum === 1 ? document.getElementById('t1-label').innerText : document.getElementById('t2-label').innerText;
-
-            if (score1 === 2 || score2 === 2) {
-                finalCelebration(teamName);
+            if(score1 === 2 || score2 === 2) {
+                const audio = document.getElementById('final-win-audio');
+                audio.play();
+                const over = document.getElementById('win-overlay');
+                document.getElementById('winner-name-display').innerText = team === 1 ? "فريق اثنين (الأخضر)" : "فريق واحد (البرتقالي)";
+                over.classList.add('show-win');
+                startFireWorks();
+                setTimeout(() => { location.reload(); }, 11000);
             } else {
-                showOverlay(`الفريق الفائز بالجولة ${roundIdx} هو الفريق ${colorStr}`, teamName, false);
-                setTimeout(() => { roundIdx++; startNewRound(); }, 4000);
+                setTimeout(() => { roundIdx++; isLocked = false; clearBoard(); }, 3000);
             }
         }
 
-        function finalCelebration(winnerName) {
-            // تشغيل صوت الفوز الخاص بك
-            const winAudio = document.getElementById('final-win-audio');
-            winAudio.play();
-
-            // إظهار رسالة البطل لمدة 11 ثانية
-            showOverlay("🏆 بطل المسابقة 🏆", winnerName, true);
-            
-            // احتفال الألعاب النارية لمدة 11 ثانية
-            var duration = 11 * 1000;
-            var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 35, spread: 360, ticks: 100, zIndex: 3000 };
-
-            var interval = setInterval(function() {
-                var timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) return clearInterval(interval);
-                var particleCount = 60 * (timeLeft / duration);
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
-            }, 300);
-        }
-
-        function hasPath(targetState, direction) {
+        function hasPath(target, dir) {
             const visited = new Set(); const stack = [];
             for (let i = 0; i < 5; i++) {
-                let cell = (direction === 'vertical') ? gridData[0][i] : gridData[i][0];
-                if (parseInt(cell.dataset.state) === targetState) stack.push([ (direction === 'vertical' ? 0 : i), (direction === 'vertical' ? i : 0) ]);
+                let cell = (dir === 'vertical') ? gridData[0][i] : gridData[i][0];
+                if (parseInt(cell.dataset.state) === target) stack.push([dir === 'vertical' ? 0 : i, dir === 'vertical' ? i : 0]);
             }
             while (stack.length > 0) {
-                const [r, c] = stack.pop(); const key = `${r},${c}`;
-                if (visited.has(key)) continue; visited.add(key);
-                if (direction === 'vertical' && r === 4) return true;
-                if (direction === 'horizontal' && c === 4) return true;
-                const neighbors = getNeighbors(r, c);
-                for (const [nr, nc] of neighbors) {
-                    if (gridData[nr] && gridData[nr][nc] && parseInt(gridData[nr][nc].dataset.state) === targetState) stack.push([nr, nc]);
-                }
+                const [r, c] = stack.pop();
+                if (visited.has(`${r},${c}`)) continue; visited.add(`${r},${c}`);
+                if ((dir === 'vertical' && r === 4) || (dir === 'horizontal' && c === 4)) return true;
+                getNeighbors(r, c).forEach(([nr, nc]) => {
+                    if (gridData[nr] && gridData[nr][nc] && parseInt(gridData[nr][nc].dataset.state) === target) stack.push([nr, nc]);
+                });
             }
             return false;
         }
@@ -234,11 +223,19 @@
             return offsets.map(([dr, dc]) => [r + dr, c + dc]).filter(([nr, nc]) => nr >= 0 && nr < 5 && nc >= 0 && nc < 5);
         }
 
-        function shuffleGrid() {
-            if(isLocked) return;
-            let pool = [...letters].sort(() => 0.5 - Math.random()).slice(0, 25);
-            document.querySelectorAll('.hexagon').forEach((h, idx) => h.innerText = pool[idx]);
+        function shuffleGrid() { renderGrid(); }
+        function clearBoard() { document.querySelectorAll('.hexagon').forEach(h => { h.className = 'hexagon'; h.dataset.state = 0; }); }
+
+        function startFireWorks() {
+            var duration = 11 * 1000; var end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
         }
+
+        renderGrid();
     </script>
 </body>
 </html>
