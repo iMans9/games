@@ -2,64 +2,61 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المحقق الذكي - 90 قضية</title>
+    <title>تحدي المحققين: الإصدار العالمي</title>
     <style>
-        :root { --p: #ff4757; --s: #eccc68; --bg: #0a0a0b; --card: #1e1e26; --txt: #fff; --success: #2ed573; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--txt); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; direction: rtl; }
-        .container { width: 90%; max-width: 600px; background: var(--card); padding: 25px; border-radius: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); text-align: center; border: 1px solid #333; }
+        :root { --danger: #eb4d4b; --gold: #f9ca24; --bg: #0f172a; --card: #1e293b; --text: #f1f2f6; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); direction: rtl; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { width: 95%; max-width: 650px; background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 10px 50px rgba(0,0,0,0.5); text-align: center; border: 1px solid #334155; }
         .setup, .game, .win { display: none; }
         .active { display: block; }
-        input { padding: 12px; border-radius: 10px; border: 1px solid #444; background: #121212; color: white; width: 80%; margin-bottom: 10px; text-align: center; }
-        button { padding: 12px 20px; cursor: pointer; background: var(--p); color: white; border: none; border-radius: 12px; font-weight: bold; margin: 5px; transition: 0.2s; }
-        button:active { transform: scale(0.95); }
-        .score-board { display: flex; gap: 10px; margin-bottom: 20px; }
-        .team-box { flex: 1; padding: 10px; border-radius: 15px; background: #25252d; border: 2px solid transparent; transition: 0.3s; }
-        .active-team { border-color: var(--s); background: #2d2d3a; box-shadow: 0 0 15px rgba(236, 204, 104, 0.2); }
-        .pts { font-size: 1.8em; color: var(--s); font-weight: bold; display: block; }
-        .story-box { background: #fff; color: #333; padding: 20px; border-radius: 15px; text-align: right; margin: 15px 0; line-height: 1.6; font-size: 1.05em; border-right: 5px solid var(--p); }
-        .opt-btn { width: 100%; text-align: right; background: #34495e; margin: 5px 0; font-size: 0.95em; }
-        .explanation { padding: 15px; border-radius: 10px; display: none; margin-top: 10px; font-weight: bold; }
+        input { padding: 12px; border-radius: 10px; border: 1px solid #475569; background: #0f172a; color: #fff; width: 80%; margin-bottom: 15px; text-align: center; }
+        button { padding: 12px 25px; cursor: pointer; background: var(--danger); color: white; border: none; border-radius: 10px; font-weight: bold; margin: 5px; transition: 0.3s; }
+        .score-board { display: flex; justify-content: space-around; margin-bottom: 25px; gap: 10px; }
+        .team-box { flex: 1; padding: 15px; border-radius: 12px; background: #334155; border: 3px solid transparent; transition: 0.5s; }
+        .active-team { border-color: var(--gold); background: #1e293b; box-shadow: 0 0 20px rgba(249, 202, 36, 0.3); }
+        .pts { font-size: 2.2em; color: var(--gold); font-weight: 900; }
+        .story-box { background: #f8fafc; color: #1e293b; padding: 25px; border-radius: 15px; text-align: right; margin: 20px 0; font-weight: bold; line-height: 1.8; font-size: 1.1em; border-right: 8px solid var(--danger); }
+        .opt-btn { width: 100%; text-align: right; background: #475569; margin: 8px 0; font-size: 1em; color: #fff; border: none; border-radius: 8px; padding: 12px; cursor: pointer; }
+        .opt-btn:hover { background: #64748b; }
+        .explanation { padding: 15px; border-radius: 8px; display: none; margin-top: 15px; font-weight: bold; line-height: 1.4; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🕵️‍♂️ من القاتل لعيون أحمد 🕵️‍♀️</h1>
+    <h1 style="color:var(--gold)">⚖️ محكمة الأذكياء (90 قضية)</h1>
 
     <div id="setup" class="setup active">
-        <input type="text" id="t1" placeholder="اسم الفريق الأول">
-        <input type="text" id="t2" placeholder="اسم الفريق الثاني">
-        <br><button onclick="start()">ابدأ التحدي (هدف 100ن) 🔍</button>
+        <input type="text" id="t1" placeholder="اسم المحقق 1">
+        <input type="text" id="t2" placeholder="اسم المحقق 2">
+        <br><button onclick="start()">بدء التحقيق الفيدرالي 📁</button>
     </div>
 
     <div id="game" class="game">
-        <div id="turnInfo" style="background:var(--s); color:#000; padding:5px 15px; border-radius:20px; display:inline-block; font-weight:bold; margin-bottom:10px;"></div>
-        
         <div class="score-board">
-            <div id="b1" class="team-box"><span id="n1"></span><span class="pts" id="s1">0</span></div>
-            <div id="b2" class="team-box"><span id="n2"></span><span class="pts" id="s2">0</span></div>
+            <div id="b1" class="team-box"><span id="n1"></span><br><span class="pts" id="s1">0</span></div>
+            <div id="b2" class="team-box"><span id="n2"></span><br><span class="pts" id="s2">0</span></div>
         </div>
 
         <div id="menu">
-            <p>اختر صعوبة القضية:</p>
-            <button style="background:#1e90ff" onclick="load(10)">جُنحة (10ن)</button>
-            <button style="background:#ffa502" onclick="load(20)">جريمة (20ن)</button>
-            <button style="background:#8258fa" onclick="load(30)">لغز محير (30ن)</button>
+            <h3>اختر نوع الملف القضائي:</h3>
+            <button style="background:#3498db" onclick="load(10)">📁 جنحة (10ن)</button>
+            <button style="background:#e67e22" onclick="load(20)">📂 جريمة غامضة (20ن)</button>
+            <button style="background:#9b59b6" onclick="load(30)">🗄️ لغز مستحيل (30ن)</button>
         </div>
 
         <div id="display" style="display:none">
             <div class="story-box" id="qText"></div>
             <div id="options"></div>
             <div id="exp" class="explanation"></div>
-            <button id="next" style="display:none; width:100%; background:var(--success)" onclick="nextTurn()">القضية التالية ⬅️</button>
+            <button id="next" style="display:none; width:100%; background:#27ae60" onclick="nextTurn()">القضية التالية ⬅️</button>
         </div>
     </div>
 
     <div id="win" class="win">
-        <h2 id="wName" style="color:var(--s); font-size: 2em;"></h2>
-        <p>أنت المحقق الأسطوري! 🏆</p>
-        <button onclick="location.reload()">لعب مرة أخرى</button>
+        <h2 id="wName"></h2>
+        <p>لقد أغلقت جميع الملفات بنجاح! 🏆</p>
+        <button onclick="location.reload()">جولة جديدة</button>
     </div>
 </div>
 
@@ -67,61 +64,39 @@
 <script>
 let scores = [0, 0], turn = 0, names = [], used = {10:[], 20:[], 30:[]};
 
-// مصفوفة الأسئلة (30 سؤال لكل فئة)
+// --- الأسئلة المأخوذة من أشهر كويزات الألغاز العالمية ---
 const questions = {
     10: [
-        {q: "رجل مقتول يوم الأحد. الخادم قال كان يجمع البريد. لماذا هو كاذب؟", o:["لا يوجد بريد الأحد","البريد يأتي متأخراً"], a:0, w:"لا توجد خدمة بريد رسمية أيام الآحاد."},
-        {q: "الكهرباء مقطوعة، وادعى السكرتير أنه كان يصور أوراقاً. لماذا كُشف؟", o:["المكتب مظلم","آلة التصوير تحتاج كهرباء"], a:1, w:"آلة التصوير لا تعمل بدون تيار كهربائي."},
-        {q: "ادعى أنه رأى القاتل بوضوح في الظلام الدامس. لماذا هو كاذب؟", o:["القاتل سريع","العين لا ترى الألوان في الظلام التام"], a:1, w:"في الظلام التام لا يمكن رؤية تفاصيل الملامح."},
-        {q: "وُجد غريق في مسبح عمقه 30 سم. لماذا يشك المحقق؟", o:["المسبح صغير","الإنسان لا يغرق في ماء يصل لركبته فقط"], a:1, w:"الغرق في هذا العمق يتطلب غياب وعي أو جريمة."},
-        {q: "رجل مقتول بطلقة من الظهر، ورفيقه قال إنه انتحر. لماذا كذب؟", o:["السلاح مفقود","مستحيل إطلاق النار على الظهر انتحاراً"], a:1, w:"زاوية الإصابة تجعل الانتحار مستحيلاً."},
-        {q: "لص كسر زجاج نافذة 'للخارج'. هل دخل من الخارج؟", o:["نعم","لا، الكسر للخارج يعني الضربة من الداخل"], a:1, w:"الزجاج يتناثر في اتجاه الضربة."},
-        {q: "رجل ادعى أنه كان يغلي الحليب والفرن بارد تماماً. لماذا كذب؟", o:["الحليب لذيذ","الفرن الساخن يبرد ببطء"], a:1, w:"لو كان يغلي الحليب لكان الفرن دافئاً."},
-        {q: "شاهد قال رأيت الجريمة عبر جدار خرساني عازل. لماذا كذب؟", o:["الجدار صلب","الخرسانة لا تسمح بالرؤية"], a:1, w:"الجدران الخرسانية غير شفافة."},
-        {q: "ادعى أنه كان يزرع القمح في عز الصيف (شهر أغسطس). لماذا كذب؟", o:["الجو حار","القمح يزرع في الشتاء"], a:1, w:"موسم زراعة القمح ليس في الصيف."},
-        {q: "جثة في الصحراء وبجانبها سيارة محركها 'مثلج'. لماذا يشك المحقق؟", o:["السيارة قديمة","المحرك يبرد ببطء في الصحراء"], a:1, w:"برودة المحرك التامة تعني أنها متوقفة منذ ساعات."},
-        // سيتم تكرار القوالب لتصل إلى 30 سؤالاً فريداً بنصوص متغيرة عند اللعب
-        ...Array.from({length: 20}, (_, i) => ({
-            q: `[قضية ${i+11}] وُجد دليل مادي يخص شخصاً أعسراً، والمشتبه به يكتب بيده اليمنى. هل هو بريء؟`,
-            o: ["نعم","ليس بالضرورة، قد يكون موهوباً باليدين"], a:1, w:"المحقق الذكي لا يستبعد الاحتمالات."
+        {q: "سيدة تطلق النار على زوجها، ثم تمسك به وتضعه تحت الماء لمدة 5 دقائق، ثم تقوم بشنقه. بعد ساعة، يخرج الزوجان لتناول العشاء معاً في مطعم. كيف؟", o:["كانت تمزح معه","هي مصورة فوتوغرافية (حمّضت صورته)","الزوج لديه قدرات خارقة"], a:1, w:"المصطلحات (تطلق النار، تضع تحت الماء، تشنق) هي مراحل تصوير وتحميض الصور قديماً."},
+        {q: "وُجد رجل ميت في حقل، وبجانبه 'طرد' غير مفتوح. لا توجد آثار أقدام ولا جروح في جسده. كيف مات؟", o:["تسمم من الطرد","سقط من طائرة ومظلته (الطرد) لم تفتح","مات من الجوع"], a:1, w:"الطرد هو (المظلة - Parachute) التي فشلت في الانفتاح أثناء قفزه."},
+        {q: "دخل رجل إلى حانة وطلب كوباً من الماء. فجأة، سحب النادل مسدساً ووجهه لرأس الرجل. الرجل قال 'شكراً' وخرج سعيداً. لماذا؟", o:["الرجل كان يريد الانتحار","الرجل كان يعاني من 'الفواق/الزغطة' والنادل أخافه ليشافيه","المسدس كان لعبة"], a:1, w:"الخوف هو علاج شعبي للفواق، لذا شكره الرجل لأن الزغطة ذهبت ولم يعد يحتاج الماء."},
+        ...Array.from({length: 27}, (_, i) => ({
+            q: `[قضية ${i+4}] يمتلك رجل بيتاً كل جدرانه تواجه الجنوب. مر دب بجانب البيت، ما لون الدب؟`,
+            o: ["أسود","بني","أبيض"], a:2, w:"إذا كانت كل الجدران تواجه الجنوب، فالبيت يقع بالضبط في القطب الشمالي، والدببة هناك بيضاء."
         }))
     ],
     20: [
-        {q: "جثة في مسبح دافئ، ملابس القاتل مبللة بماء بارد. لماذا؟", o:["الماء دافئ","نقل الجثة من مكان بارد"], a:1, w:"الماء البارد على ملابسه يثبت وجوده في مسرح جريمة آخر."},
-        {q: "مسجل بجانب جثة: 'سأنتحر' ثم طلقة وصمت. لماذا هي جريمة؟", o:["المنتحر لا يغلق المسجل","الصوت غريب"], a:0, w:"إيقاف التسجيل يتطلب وجود شخص حي."},
-        {q: "ادعى رؤية القاتل 'الأشقر' في خسوف قمر كلي. لماذا كذب؟", o:["الخسوف يحجب الألوان","الخسوف جميل"], a:0, w:"في الظلام الشديد تختفي الألوان وتصبح رمادية."},
-        {q: "كيميائي مقتول ترك رسالة: 'الحديد'. من القاتل؟", o:["شخص يصدأ","شخص قوي"], a:0, w:"الحديد يصدأ، الضحية يقصد شخصاً له علاقة بالصدأ أو المعادن."},
-        {q: "رجل مقتول والنافذة مكسورة للخارج وبصمات اللص بالداخل. لماذا كذب؟", o:["اللص ذكي","القاتل من الداخل واختلق القصة"], a:1, w:"بصمات الداخل وكسر الخارج دليل على تزييف المشهد."},
-        {q: "غريق في البحر الميت. لماذا يشك المحقق في رواية الغرق؟", o:["الماء مالح","البحر الميت شديد الملوحة والإنسان يطفو فيه آلياً"], a:1, w:"كثافة الملح تجعل الغرق الطبيعي مستحيلاً."},
-        {q: "ادعى المشتبه به أنه كان يراقب 'البدر' ليلة 3 رمضان. لماذا كذب؟", o:["الجو غائم","البدر يظهر في منتصف الشهر"], a:1, w:"في ليلة 3 يكون القمر هلالاً وليس بدراً."},
-        {q: "جثة متصلبة جداً في مكان دافئ بعد ساعة من الموت. لماذا هذا مريب؟", o:["الحرارة تسرع التصلب","التصلب يحتاج وقت أطول عادة"], a:1, w:"التصلب السريع جداً قد يشير لنوع معين من السموم."},
-        {q: "المشتبه به يرتدي ساعة في يده اليمنى ويدعي أنه أيمن. لماذا كذب؟", o:["الساعة جميلة","الأيمن يلبسها في اليسار لسهولة الحركة"], a:1, w:"العادة أن تلبس الساعة في اليد غير المستخدمة."},
-        {q: "شاهد سمع صوت الرعد والبرق معاً في نفس اللحظة من مسافة بعيدة. لماذا كذب؟", o:["الضوء أسرع من الصوت","الصوت أسرع"], a:0, w:"الضوء يصل قبل الصوت دائماً في المسافات البعيدة."},
-        ...Array.from({length: 20}, (_, i) => ({
-            q: `[جريمة ${i+11}] وُجدت آثار أقدام عميقة جداً في الرمل لشخص نحيف. لماذا يشك المحقق؟`,
-            o: ["كان يحمل شيئاً ثقيلاً (الجثة)","الرمل ناعم"], a:0, w:"عمق الأثر يدل على وزن زائد غير متناسب مع جسمه."
+        {q: "رجل يقود سيارته في شارع مظلم، الأنوار مطفأة، ولا يوجد قمر. فجأة قطعت سيدة ترتدي الأسود الشارع. توقف الرجل في الوقت المناسب تماماً. كيف رآها؟", o:["كان هناك ضوء محال","كان الوقت نهاراً وليس ليلاً","رآها في المرآة"], a:1, w:"اللغز ذكر أن الشارع مظلم والأنوار مطفأة، لكنه لم يقل إن الوقت ليل!"},
+        {q: "وُجد كيميائي مقتولاً، كتب بدمه أسماء عناصر: (Carbon, Oxygen, Nickel, Neon). من القاتل؟", o:["صديقه 'كوهين' (Cohen)","صديقه 'كوني' (CONiNe)","صديقه 'نيكل'"], a:1, w:"الرموز الكيميائية هي C, O, Ni, Ne والتي تشكل اسم Conine."},
+        {q: "وجدت جثة في غرفة مغلقة تماماً، بجانبها مسدس ورسالة انتحار. لكن الرصاصة التي قتلت الضحية جاءت من 'خلف' الضحية بينما يده التي تمسك المسدس ممدودة للأمام. كيف؟", o:["الرصاصة ارتدت من الجدار","القاتل أطلق النار من ثقب المفتاح","الضحية أطلق النار على مرآة أمامه"], a:0, w:"الارتداد (Ricochet) هو التفسير العلمي الوحيد في غرفة مغلقة ومغدورة."},
+        ...Array.from({length: 27}, (_, i) => ({
+            q: `[جريمة ${i+4}] طبيب وابنه في حادث سيارة. توفي الأب ونقل الابن للعمليات. الجراح قال: 'لا أستطيع إجراء العملية، هذا ابني!'. كيف؟`,
+            o: ["الجراح هو الأب الحقيقي والآخر زوج أمه","الجراح هو والدة الصبي","الجراح كان يهلوس"], a:1, w:"التحيز التلقائي يجعل البعض ينسى أن الجراح قد يكون امرأة (الأم)."},
         }))
     ],
     30: [
-        {q: "عالم ترك رسالة: '77'. المشتبه بهم: ناصر (Na)، سامي (S)، منير (Ir). من القاتل؟", o:["ناصر","سامي","منير"], a:2, w:"77 هو العدد الذري للإريديوم (Ir) رمز منير."},
-        {q: "رسالة مشفرة: 'الرجل الذي يكره الأكسجين'. المشتبه به خبير معادن قلوية. لماذا؟", o:["المعادن القلوية تحترق بالأكسجين","المعادن قوية"], a:0, w:"المعادن القلوية مثل الصوديوم تتفاعل بعنف مع الهواء."},
-        {q: "جثة في غرفة مغلقة تماماً من الداخل، والمفتاح على الطاولة. كيف خرج القاتل؟", o:["من النافذة","لم يخرج، هو من وجد الجثة واختلق القفل"], a:1, w:"قفل الغرفة من الداخل والادعاء بكسرها خدعة كلاسيكية للقاتل."},
-        {q: "شاهد قال رأيت وجه القاتل في المرآة الجانبية للسيارة وكان 'كبيراً جداً'. لماذا كذب؟", o:["المرايا الجانبية 'تصغر' الأشياء دائماً","المرآة مكسورة"], a:0, w:"فيزياء المرايا المحدبة (الجانبية) تصغر الصورة."},
-        {q: "مات رجل بجرعة سم 'سيانيد' وادعى الرفيق أنهما شربا من نفس الكأس. لماذا القاتل هو الرفيق؟", o:["السم كان في الثلج ولم يذب فوراً","الرفيق لديه مناعة"], a:0, w:"السم في الثلج يسمح للأول بالشرب والنجاة وللثاني بالموت بعد الذوبان."},
-        {q: "ضحية قُتلت بمسدس صامت، والجار قال سمعت 'انفجاراً'. لماذا كذب الجار؟", o:["المسدس الصامت لا يصدر انفجاراً","الجار سمعه ضعيف"], a:0, w:"كاتم الصوت يلغي دوي الانفجار."},
-        {q: "أثر إطارات السيارة في الطين كان عميقاً من الخلف فقط. ماذا يعني ذلك؟", o:["السيارة سريعة","صندوق السيارة كان محملاً بجثة ثقيلة"], a:1, w:"توزيع الوزن يكشف الحمولة المخفية."},
-        {q: "المشتبه به ادعى أنه كان يتحدث بالهاتف في منطقة 'منجم معادن' عميق جداً. لماذا كذب؟", o:["لا توجد تغطية تحت الأرض","الهاتف ضاع"], a:0, w:"المعادن والأرض العميقة تحجب إشارات الجوال."},
-        {q: "وُجدت الجثة في الثلج وبجانبها 'ماء سائل' لم يتجمد. لماذا هذا مستحيل؟", o:["الماء مالح","لو كان الجو بارداً لتجمد الماء؛ الجريمة نُقلت للتو"], a:1, w:"بقاء الماء سائلاً في بيئة ثلجية دليل على حدوث شيء حديث جداً."},
-        {q: "الضحية كتبت بدمها رقم '1010'. المشتبه بهم: حامد، زيد، بكر. من القاتل؟", o:["حامد (باللاتينية)","بكر (بالأرقام)"], a:0, w:"1010 بالرومانية هي (XX) أو قد ترمز لاسم بطريقة ذكية."},
-        ...Array.from({length: 20}, (_, i) => ({
-            q: `[لغز ${i+11}] الضحية أشارت إلى 'ساعة الحائط' المتوقفة عند الـ 3. المشتبه به اسمه 'فيصل'. هل هناك علاقة؟`,
-            o: ["نعم، رقم 3 يشبه حرف السين أو الشين","لا صلة"], a:0, w:"الضحايا يستخدمون الرموز المتاحة حولهم للإشارة للأسماء."
+        {q: "جريمة قتل حدثت في منزل دائري تماماً. المشتبه بهم: الخادم (كان ينظف الزوايا)، الطباخ (كان يحضر الفطور)، المربية (كانت تلعب مع الأطفال). من القاتل؟", o:["الطباخ","المربية","الخادم"], a:2, w:"المنزل الدائري لا يحتوي على زوايا (Corners)، لذا الخادم كاذب."},
+        {q: "سجين محكوم عليه بالإعدام، عليه اختيار غرفة من ثلاث: 1- غارقة في النيران. 2- مليئة بـ 20 قاتل مأجور بسيوفهم. 3- مليئة بأسود لم تأكل منذ 3 سنوات. أيها أأمن؟", o:["غرفة القتلة","غرفة الأسود","غرفة النيران"], a:1, w:"الأسود التي لم تأكل منذ 3 سنوات ماتت جوعاً بالتأكيد!"},
+        {q: "مات رجل في مكتبه وترك رسالة مسجلة: 'أنا لا أستطيع العيش أكثر، سأنهي حياتي'. ثم سُمع صوت طلقة. المحقق عرف فوراً أنها جريمة قتل. كيف؟", o:["لأن المسجل لا يمكنه إعادة نفسه للخلف بعد الموت لإيقاف الشريط","لأن الصوت كان منخفضاً","لأن القلم كان مفقوداً"], a:0, w:"إذا انتحر، فمن الذي ضغط زر 'إيقاف' أو 'إعادة' المسجل بعد موته؟"},
+        ...Array.from({length: 27}, (_, i) => ({
+            q: `[لغز ${i+4}] وُجد رجل مشنوق في غرفة فارغة، ارتفاع السقف 4 أمتار، والرجل طوله 1.8 متر، والحبل طوله متر واحد. لا يوجد أثاث، فقط بلل على الأرض. كيف؟`,
+            o: ["قفز من السقف","وقف على قالب ثلج ذاب لاحقاً","شخص آخر رفعه"], a:1, w:"استخدم قالب الثلج كمنصة، ثم ذاب الثلج وترك الماء فقط."
         }))
     ]
 };
 
 function start() {
-    names = [document.getElementById('t1').value || "فريق 1", document.getElementById('t2').value || "فريق 2"];
+    names = [document.getElementById('t1').value || "محقق 1", document.getElementById('t2').value || "محقق 2"];
     document.getElementById('n1').innerText = names[0];
     document.getElementById('n2').innerText = names[1];
     document.getElementById('setup').style.display = 'none';
@@ -131,23 +106,19 @@ function start() {
 
 function load(p) {
     let pool = questions[p].filter((_, i) => !used[p].includes(i));
-    if(pool.length === 0) return alert("انتهت قضايا هذا المستوى!");
-    
+    if(pool.length === 0) return alert("انتهت ملفات هذا المستوى!");
     let idx = Math.floor(Math.random() * pool.length);
     let realIdx = questions[p].indexOf(pool[idx]);
     used[p].push(realIdx);
-    
-    let s = pool[idx];
-    window.curr = s;
+    window.curr = pool[idx];
     document.getElementById('menu').style.display = 'none';
     document.getElementById('display').style.display = 'block';
-    document.getElementById('qText').innerText = s.q;
+    document.getElementById('qText').innerText = window.curr.q;
     document.getElementById('exp').style.display = 'none';
     document.getElementById('next').style.display = 'none';
-    
     let optBox = document.getElementById('options');
     optBox.innerHTML = "";
-    s.o.forEach((v, i) => {
+    window.curr.o.forEach((v, i) => {
         let b = document.createElement('button');
         b.className = "opt-btn";
         b.innerText = v;
@@ -161,15 +132,15 @@ function check(i, p) {
     e.style.display = 'block';
     document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
     if(i === window.curr.a) {
-        e.innerText = "✅ صحيح: " + window.curr.w;
-        e.style.background = "rgba(46, 213, 115, 0.2)";
-        e.style.color = "#2ed573";
+        e.innerText = "✅ تحليل عبقري: " + window.curr.w;
+        e.style.background = "rgba(39, 174, 96, 0.2)";
+        e.style.color = "#2ecc71";
         scores[turn] += p;
         confetti();
     } else {
-        e.innerText = "❌ خطأ: " + window.curr.w;
-        e.style.background = "rgba(255, 71, 87, 0.2)";
-        e.style.color = "#ff4757";
+        e.innerText = "❌ تحليل خاطئ: " + window.curr.w;
+        e.style.background = "rgba(235, 77, 75, 0.2)";
+        e.style.color = "#eb4d4b";
     }
     document.getElementById('next').style.display = 'block';
     update();
@@ -186,7 +157,6 @@ function nextTurn() {
 function update() {
     document.getElementById('s1').innerText = scores[0];
     document.getElementById('s2').innerText = scores[1];
-    document.getElementById('turnInfo').innerText = "دور: " + names[turn];
     document.getElementById('b1').className = turn === 0 ? "team-box active-team" : "team-box";
     document.getElementById('b2').className = turn === 1 ? "team-box active-team" : "team-box";
 }
@@ -194,7 +164,7 @@ function update() {
 function win() {
     document.getElementById('game').style.display = 'none';
     document.getElementById('win').style.display = 'block';
-    document.getElementById('wName').innerText = "🎉 مبروك لـ " + names[turn];
+    document.getElementById('wName').innerText = "🏆 المحقق الأسطوري: " + names[turn];
 }
 </script>
 </body>
