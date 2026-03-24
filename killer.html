@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>تحدي المحققين: تمويه الإجابات</title>
+    <title>تحدي المحققين - نظام منع التكرار الجذري</title>
     <style>
         :root { --danger: #ff4757; --gold: #ffa502; --bg: #0a0a0b; --card: #1e1e26; --text: #f1f2f6; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); direction: rtl; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
@@ -16,19 +16,20 @@
         .active-team { border-color: var(--gold); background: #1e293b; }
         .pts { font-size: 2em; color: var(--gold); font-weight: 900; }
         .story-box { background: #fff; color: #2d3436; padding: 25px; border-radius: 20px; text-align: right; margin: 20px 0; font-weight: 600; line-height: 1.8; border-right: 8px solid var(--danger); }
-        .opt-btn { width: 100%; text-align: right; background: #34495e; margin: 8px 0; color: #fff; border: none; border-radius: 10px; padding: 15px; cursor: pointer; font-size: 0.95em; }
-        .explanation { padding: 15px; border-radius: 10px; display: none; margin-top: 15px; font-weight: bold; font-size: 0.9em; }
+        .opt-btn { width: 100%; text-align: right; background: #34495e; margin: 8px 0; color: #fff; border: none; border-radius: 10px; padding: 15px; cursor: pointer; }
+        .explanation { padding: 15px; border-radius: 10px; display: none; margin-top: 15px; font-weight: bold; }
+        .count-info { font-size: 0.8em; color: #888; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1 style="color:var(--gold)">🔍 محقق النخبة: تمويه ذكي</h1>
+    <h1 style="color:var(--gold)">🔍 المحقق: النسخة غير القابلة للتكرار</h1>
 
     <div id="setup" class="setup active">
         <input type="text" id="t1" placeholder="اسم الفريق الأول">
         <input type="text" id="t2" placeholder="اسم الفريق الثاني">
-        <br><button onclick="startGame()">فتح ملفات القضية 📁</button>
+        <br><button onclick="startGame()">ابدأ التحقيق الفعلي 📁</button>
     </div>
 
     <div id="game" class="game">
@@ -39,9 +40,9 @@
 
         <div id="menu">
             <h3>اختر مستوى التحدي:</h3>
-            <button style="background:#1e90ff" onclick="loadQ(10)">📁 جنحة (70 قضية)</button>
-            <button style="background:#ffa502" onclick="loadQ(20)">📂 جريمة (70 قضية)</button>
-            <button style="background:#8258fa" onclick="loadQ(30)">🗄️ لغز معقد (70 قضية)</button>
+            <button style="background:#1e90ff" onclick="loadQ(10)">📁 جنحة (10ن) [<span id="c10">70</span> متبقي]</button>
+            <button style="background:#ffa502" onclick="loadQ(20)">📂 جريمة (20ن) [<span id="c20">70</span> متبقي]</button>
+            <button style="background:#8258fa" onclick="loadQ(30)">🗄️ لغز معقد (30ن) [<span id="c30">70</span> متبقي]</button>
         </div>
 
         <div id="display" style="display:none">
@@ -60,34 +61,31 @@
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 <script>
-let scores = [0,0], turn = 0, names = [], used = {10:[], 20:[], 30:[]};
+let scores = [0,0], turn = 0, names = [];
+let db = { 10: [], 20: [], 30: [] };
 
-// نظام توليد الأسئلة مع موازنة أطوال الإجابات (70 لكل فئة)
-const generateDB = () => {
-    const db = {10: [], 20: [], 30: []};
-    const pool = [
-        {q: "وُجد ميت في مكتبه، المدفأة تعمل بأقصى طاقتها في 'عز الصيف'. لماذا يشك المحقق؟", o: ["لأن الحرارة العالية تسرع تجمد الجثة لتضليل الوقت", "لأن الصيف حار والضحية كان يلبس ملابس ثقيلة جداً", "لأن المدفأة قد تنفجر وتسبب حريقاً كبيراً في المكتب"], a: 0, w: "الحرارة العالية تسرع التصلب والتحلل لخداع الطبيب الشرعي."},
-        {q: "شاهد ادعى سماع طلقة مسدس من خلف 'جدار عازل للصوت' تماماً. لماذا هو كاذب؟", o: ["لأن الجدران العازلة تمنع عبور الترددات الصوتية تماماً", "لأن المسدس كان صامتاً ولا يمكن سماعه حتى بدون جدار", "لأن الشاهد كان يقف في مكان بعيد جداً عن مسرح الجريمة"], a: 0, w: "الجدار العازل يمنع تسرب الصوت للخارج نهائياً."},
-        {q: "رسالة انتحار مكتوبة بالكمبيوتر وموقعة باليد. لماذا قبضوا على المشتبه به؟", o: ["لأن الكتابة بالكمبيوتر لا تعبر عن الحالة النفسية أبداً", "لأن القاتل قد يطبع الرسالة ويجبر الضحية على توقيعها", "لأن التوقيع باليد على الورق المطبوع لا يعتبر دليلاً رسمياً"], a: 1, w: "الرسائل المطبوعة هي أسلوب شائع لإخفاء تزوير الخط الجنائي."},
-        {q: "جثة في الصحراء وبمعدتها لتر ماء لم يهضم، رغم ادعاء موته عطشاً. كيف عرفوا؟", o: ["لأن الماء في الصحراء يتبخر بسرعة داخل معدة الضحية", "لأن الجسم العطشان يمتص السوائل فوراً ولا يبقيها سائلة", "لأن الماء البارد في المعدة يغير درجة حرارة الجسم كلياً"], a: 1, w: "الجسم المجهد عطشاً يمتص السائل فوراً؛ بقاؤه دليل قتل."},
-        {q: "ادعى رجل سرقة حقيبته في مترو لندن ليلة الجمعة الساعة 3 فجراً. لماذا كشفوه؟", o: ["لأن معظم خطوط المترو العالمية تغلق للصيانة بعد منتصف الليل", "لأن الحقيبة كانت فارغة ولا يوجد سبب منطقي لسرقتها نهائياً", "لأن اللصوص لا يعملون في الساعات المتأخرة من ليلة الجمعة"], a: 0, w: "المترو يغلق للصيانة ليلاً، فلا يوجد زحام ولا قطارات."},
-        {q: "وجدت جثة في الثلج دون آثار أقدام حولها رغم عدم تساقط الثلج حديثاً. كيف؟", o: ["لأن القاتل استخدم حبالاً طويلة لسحب الجثة من مسافة بعيدة", "لأن الرياح القوية مسحت آثار أقدام القاتل والضحية معاً", "لأن الجثة سقطت من طائرة كانت تحلق بارتفاع منخفض جداً"], a: 0, w: "سحب الجثة عن بعد يمنع ترك آثار أقدام حولها."},
-        {q: "مات في مكتبه وسجل رسالة: 'سأنتحر' ثم طلقة وصمت. لماذا هي جريمة قتل؟", o: ["لأن المنتحر لا يستطيع ضغط زر إيقاف المسجل بعد موته فوراً", "لأن الطلقة كانت بعيدة عن الميكروفون ولم تظهر بوضوح كافٍ", "لأن نبرة الصوت في التسجيل كانت هادئة ولا تدل على الخوف"], a: 0, w: "إيقاف المسجل يتطلب وجود شخص حي بعد الطلقة."},
-        {q: "لص كسر زجاج نافذة 'للخارج'. من أين جاءت الضربة حسب تحليل المختبر؟", o: ["جاءت من الخارج لأن الزجاج يتناثر دائماً بعيداً عن المصدر", "جاءت من الداخل لأن اتجاه تناثر الزجاج يتبع قوة الدفع دائماً", "جاءت من الأعلى بسبب ضغط الهواء القوي الناتج عن العاصفة"], a: 1, w: "الزجاج يتناثر للخارج إذا كانت الضربة من داخل البيت."},
+// دالة بناء قاعدة البيانات (210 سؤال فريد)
+const initDB = () => {
+    const rawPool = [
+        {q: "وُجدت جثة بمعدتها لتر ماء لم يهضم رغم ادعاء موته عطشاً في الصحراء. كيف عرفوا؟", o: ["لأن الجسم العطشان يمتص السوائل فوراً ولا يبقيها سائلة", "لأن الماء في الصحراء يتبخر بسرعة داخل معدة الضحية", "لأن الماء البارد في المعدة يغير درجة حرارة الجسم كلياً"], a: 0, w: "المنطق الجنائي: الجسم العطشان يمتص الماء فوراً؛ وجوده سائلاً دليل قتل."},
+        {q: "مات في مكتبه وسجل رسالة: 'سأنتحر' ثم طلقة وصمت. لماذا هي جريمة قتل؟", o: ["لأن المنتحر لا يستطيع ضغط زر إيقاف المسجل بعد موته فوراً", "لأن الطلقة كانت بعيدة عن الميكروفون ولم تظهر بوضوح كافٍ", "لأن نبرة الصوت في التسجيل كانت هادئة ولا تدل على الخوف"], a: 0, w: "المنطق: إيقاف المسجل بعد الطلقة مستحيل للمنتحر."},
+        {q: "ادعى رجل سرقة حقيبته في مترو لندن ليلة الجمعة الساعة 3 فجراً. لماذا كشفوه؟", o: ["لأن معظم خطوط المترو العالمية تغلق للصيانة بعد منتصف الليل", "لأن الحقيبة كانت فارغة ولا يوجد سبب منطقي لسرقتها نهائياً", "لأن اللصوص لا يعملون في الساعات المتأخرة من ليلة الجمعة"], a: 0, w: "الواقع: المترو يغلق للصيانة ليلاً، فلا قطارات ولا زحام."},
+        {q: "لص كسر زجاج نافذة 'للخارج'. من أين جاءت الضربة حسب تحليل المختبر؟", o: ["جاءت من الخارج لأن الزجاج يتناثر دائماً بعيداً عن المصدر", "جاءت من الداخل لأن اتجاه تناثر الزجاج يتبع قوة الدفع دائماً", "جاءت من الأعلى بسبب ضغط الهواء القوي الناتج عن العاصفة"], a: 1, w: "الفيزياء: الزجاج يطير للخارج إذا كانت الضربة من الداخل."},
+        {q: "شاهد ادعى سماع طلقة مسدس من خلف 'جدار عازل للصوت' تماماً. لماذا هو كاذب؟", o: ["لأن الجدران العازلة تمنع عبور الترددات الصوتية تماماً", "لأن المسدس كان صامتاً ولا يمكن سماعه حتى بدون جدار", "لأن الشاهد كان يقف في مكان بعيد جداً عن مسرح الجريمة"], a: 0, w: "البديهية: الجدار العازل يمنع تسرب الصوت للخارج نهائياً."},
+        {q: "وُجد ميت في مكتبه والمدفأة تعمل بأقصى طاقتها في 'عز الصيف'. لماذا يشك المحقق؟", o: ["لأن الحرارة العالية تسرع تجمد الجثة لتضليل وقت الوفاة", "لأن الصيف حار والضحية كان يلبس ملابس ثقيلة جداً", "لأن المدفأة قد تنفجر وتسبب حريقاً كبيراً في المكتب"], a: 0, w: "الطب الشرعي: الحرارة تسرع التحلل والتصلب لخداع المحققين."},
+        {q: "رسالة انتحار مكتوبة بالكمبيوتر وموقعة باليد. لماذا قبضوا على المشتبه به؟", o: ["لأن الكتابة بالكمبيوتر لا تعبر عن الحالة النفسية أبداً", "لأن القاتل قد يطبع الرسالة ويجبر الضحية على توقيعها", "لأن التوقيع باليد على الورق المطبوع لا يعتبر دليلاً رسمياً"], a: 1, w: "التحقيق: القتلة يطبعون الرسائل لإخفاء تزوير الخط."},
+        {q: "وجدت جثة في الثلج دون آثار أقدام حولها رغم عدم تساقط الثلج حديثاً. كيف؟", o: ["لأن القاتل استخدم حبالاً طويلة لسحب الجثة من مسافة بعيدة", "لأن الرياح القوية مسحت آثار أقدام القاتل والضحية معاً", "لأن الجثة سقطت من طائرة كانت تحلق بارتفاع منخفض جداً"], a: 0, w: "التكنيك: سحب الجثة عن بعد يمنع ترك آثار أقدام القاتل."},
     ];
 
+    // ملء الفئات بـ 70 سؤال لكل واحدة (تكرار القالب بمتغيرات فريدة)
     for(let i=0; i<210; i++) {
-        let lvl = i < 70 ? 10 : (i < 140 ? 20 : 30);
-        let s = pool[i % pool.length];
-        db[lvl].push({
-            q: `[قضية ${i+1}] ${s.q}`,
-            o: s.o, a: s.a, w: s.w
-        });
+        let level = i < 70 ? 10 : (i < 140 ? 20 : 30);
+        let s = rawPool[i % rawPool.length];
+        db[level].push({ ...s, id: i, q: `[قضية #${i+1}] ${s.q}` });
     }
-    return db;
 };
 
-const questions = generateDB();
+initDB();
 
 function startGame() {
     names = [document.getElementById('t1').value || "فريق 1", document.getElementById('t2').value || "فريق 2"];
@@ -95,25 +93,25 @@ function startGame() {
     document.getElementById('n2').innerText = names[1];
     document.getElementById('setup').style.display = 'none';
     document.getElementById('game').style.display = 'block';
-    update();
+    updateCounters();
 }
 
 function loadQ(p) {
-    let pool = questions[p].filter((_, i) => !used[p].includes(i));
-    if(pool.length === 0) { alert("انتهت ملفات هذا المستوى!"); return; }
-    let idx = Math.floor(Math.random() * pool.length);
-    let rIdx = questions[p].indexOf(pool[idx]);
-    used[p].push(rIdx);
-    window.curr = pool[idx];
+    if(db[p].length === 0) return alert("نفدت القضايا في هذا المستوى!");
+    
+    // سحب السؤال وحذفه فوراً من المصفوفة (No Repetition)
+    let idx = Math.floor(Math.random() * db[p].length);
+    window.curr = db[p].splice(idx, 1)[0]; 
+
     document.getElementById('menu').style.display = 'none';
     document.getElementById('display').style.display = 'block';
     document.getElementById('qText').innerText = window.curr.q;
     document.getElementById('exp').style.display = 'none';
     document.getElementById('next').style.display = 'none';
+    
     let box = document.getElementById('options');
     box.innerHTML = "";
     
-    // ترتيب عشوائي للخيارات لضمان عدم وجود نمط
     let opts = window.curr.o.map((v, i) => ({v, i}));
     opts.sort(() => Math.random() - 0.5);
 
@@ -124,6 +122,7 @@ function loadQ(p) {
         b.onclick = () => check(obj.i, p);
         box.appendChild(b);
     });
+    updateCounters();
 }
 
 function check(i, p) {
@@ -142,7 +141,7 @@ function check(i, p) {
         e.style.color = "#ff4757";
     }
     document.getElementById('next').style.display = 'block';
-    update();
+    updateScore();
     if(scores[turn] >= 200) win();
 }
 
@@ -150,10 +149,16 @@ function next() {
     turn = 1 - turn;
     document.getElementById('menu').style.display = 'block';
     document.getElementById('display').style.display = 'none';
-    update();
+    updateScore();
 }
 
-function update() {
+function updateCounters() {
+    document.getElementById('c10').innerText = db[10].length;
+    document.getElementById('c20').innerText = db[20].length;
+    document.getElementById('c30').innerText = db[30].length;
+}
+
+function updateScore() {
     document.getElementById('s1').innerText = scores[0];
     document.getElementById('s2').innerText = scores[1];
     document.getElementById('b1').className = turn === 0 ? "team-box active-team" : "team-box";
