@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>تحدي المحققين: 210 قضية غامضة</title>
+    <title>تحدي المحققين: تمويه الإجابات</title>
     <style>
         :root { --danger: #ff4757; --gold: #ffa502; --bg: #0a0a0b; --card: #1e1e26; --text: #f1f2f6; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); direction: rtl; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
@@ -16,14 +16,14 @@
         .active-team { border-color: var(--gold); background: #1e293b; }
         .pts { font-size: 2em; color: var(--gold); font-weight: 900; }
         .story-box { background: #fff; color: #2d3436; padding: 25px; border-radius: 20px; text-align: right; margin: 20px 0; font-weight: 600; line-height: 1.8; border-right: 8px solid var(--danger); }
-        .opt-btn { width: 100%; text-align: right; background: #34495e; margin: 8px 0; color: #fff; border: none; border-radius: 10px; padding: 15px; cursor: pointer; font-size: 1em; }
-        .explanation { padding: 15px; border-radius: 10px; display: none; margin-top: 15px; font-weight: bold; }
+        .opt-btn { width: 100%; text-align: right; background: #34495e; margin: 8px 0; color: #fff; border: none; border-radius: 10px; padding: 15px; cursor: pointer; font-size: 0.95em; }
+        .explanation { padding: 15px; border-radius: 10px; display: none; margin-top: 15px; font-weight: bold; font-size: 0.9em; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1 style="color:var(--gold)">🔍 محقق النخبة (210 قضايا)</h1>
+    <h1 style="color:var(--gold)">🔍 محقق النخبة: تمويه ذكي</h1>
 
     <div id="setup" class="setup active">
         <input type="text" id="t1" placeholder="اسم الفريق الأول">
@@ -39,9 +39,9 @@
 
         <div id="menu">
             <h3>اختر مستوى التحدي:</h3>
-            <button style="background:#1e90ff" onclick="loadQ(10)">📁 جنحة (70 سؤال)</button>
-            <button style="background:#ffa502" onclick="loadQ(20)">📂 جريمة (70 سؤال)</button>
-            <button style="background:#8258fa" onclick="loadQ(30)">🗄️ لغز معقد (70 سؤال)</button>
+            <button style="background:#1e90ff" onclick="loadQ(10)">📁 جنحة (70 قضية)</button>
+            <button style="background:#ffa502" onclick="loadQ(20)">📂 جريمة (70 قضية)</button>
+            <button style="background:#8258fa" onclick="loadQ(30)">🗄️ لغز معقد (70 قضية)</button>
         </div>
 
         <div id="display" style="display:none">
@@ -62,25 +62,26 @@
 <script>
 let scores = [0,0], turn = 0, names = [], used = {10:[], 20:[], 30:[]};
 
-// مولد ذكي لـ 210 سؤال بتركات جنائية
+// نظام توليد الأسئلة مع موازنة أطوال الإجابات (70 لكل فئة)
 const generateDB = () => {
     const db = {10: [], 20: [], 30: []};
-    const scenarios = [
-        {q: "وُجد ميت في مكتبه، المدفأة تعمل بأقصى طاقتها في 'عز الصيف'، والنافذة مفتوحة. المشتبه به قال أن الضحية كان يشعر بالبرد. لماذا هو القاتل؟", o: ["لأن الجو حار أصلاً", "لتغيير وقت الوفاة بتسريع تصلب الجثة", "لأن النافذة المفتوحة تبرد الغرفة"], a: 1, w: "الحرارة العالية تسرع التحلل والتصلب، مما يضلل الطبيب الشرعي في تحديد وقت الوفاة الدقيق."},
-        {q: "ادعى شاهد أنه سمع طلقة مسدس من خلف 'جدار عازل للصوت' تماماً. لماذا قبضوا عليه؟", o: ["لأن صوته ضعيف", "لأن الجدار العازل يمنع سماع الأصوات بالخارج تماماً", "لأن المسدس كان صامتاً"], a: 1, w: "الجدار العازل للصوت وُضع لمنع خروج الصوت، فكيف سمعه الشاهد؟"},
-        {q: "رسالة انتحار مكتوبة بالكمبيوتر وموقعة باليد. لماذا يشك المحقق؟", o: ["لأن الخط غير واضح", "المنتحر يفضل الكتابة باليد ليعبر عن مشاعره", "من السهل تزوير رسالة مطبوعة وإجبار الضحية على توقيعها"], a: 2, w: "الرسائل المطبوعة هي أسلوب القتلة لإخفاء تزوير الخط الجنائي."},
-        {q: "وُجدت جثة في الصحراء، والمشتبه به قال أن الضحية تاه ومات من 'العطش'، لكن فحص المعدة أظهر وجود لتر ماء لم يهضم. لماذا هو كذب؟", o: ["لأن الماء يتبخر", "لو كان عطشاناً لامتص الجسم الماء فوراً ولم يبقَ في المعدة", "الماء كان مالحاً"], a: 1, w: "الجسم العطشان يمتص السوائل بسرعة البرق؛ بقاء الماء يعني أنه قُتل ثم سُقي الماء لتضليل التحقيق."},
-        {q: "رجل ادعى أن لصاً سرق حقيبته وهرب في زحام 'مترو الأنفاق' ليلة الجمعة الساعة 3 فجراً في لندن. لماذا قبضوا عليه؟", o: ["لا يوجد زحام فجراً", "المترو يغلق في هذا الوقت للصيانة", "الحقيبة ثقيلة"], a: 1, w: "معظم خطوط مترو الأنفاق عالمياً تغلق للصيانة بعد منتصف الليل، ولا يوجد زحام في ذلك الوقت."},
-        {q: "جريمة في الثلج. آثار أقدام الضحية تنتهي فجأة في منتصف الطريق دون وجود أي آثار أخرى بجانبها. كيف قُتل؟", o: ["طارت الجثة", "القاتل سحبه بحبل من بعيد", "الضحية كان يمشي على الثلج الرقيق وسقط في حفرة مخفية"], a: 1, w: "الشد بالحبل أو استخدام وسيلة بعيدة هو التفسير لعدم وجود آثار أقدام للقاتل."},
-        // سيتم ملء البقية برمجياً لضمان الوصول لـ 70 سؤال لكل فئة بمتغيرات مختلفة
+    const pool = [
+        {q: "وُجد ميت في مكتبه، المدفأة تعمل بأقصى طاقتها في 'عز الصيف'. لماذا يشك المحقق؟", o: ["لأن الحرارة العالية تسرع تجمد الجثة لتضليل الوقت", "لأن الصيف حار والضحية كان يلبس ملابس ثقيلة جداً", "لأن المدفأة قد تنفجر وتسبب حريقاً كبيراً في المكتب"], a: 0, w: "الحرارة العالية تسرع التصلب والتحلل لخداع الطبيب الشرعي."},
+        {q: "شاهد ادعى سماع طلقة مسدس من خلف 'جدار عازل للصوت' تماماً. لماذا هو كاذب؟", o: ["لأن الجدران العازلة تمنع عبور الترددات الصوتية تماماً", "لأن المسدس كان صامتاً ولا يمكن سماعه حتى بدون جدار", "لأن الشاهد كان يقف في مكان بعيد جداً عن مسرح الجريمة"], a: 0, w: "الجدار العازل يمنع تسرب الصوت للخارج نهائياً."},
+        {q: "رسالة انتحار مكتوبة بالكمبيوتر وموقعة باليد. لماذا قبضوا على المشتبه به؟", o: ["لأن الكتابة بالكمبيوتر لا تعبر عن الحالة النفسية أبداً", "لأن القاتل قد يطبع الرسالة ويجبر الضحية على توقيعها", "لأن التوقيع باليد على الورق المطبوع لا يعتبر دليلاً رسمياً"], a: 1, w: "الرسائل المطبوعة هي أسلوب شائع لإخفاء تزوير الخط الجنائي."},
+        {q: "جثة في الصحراء وبمعدتها لتر ماء لم يهضم، رغم ادعاء موته عطشاً. كيف عرفوا؟", o: ["لأن الماء في الصحراء يتبخر بسرعة داخل معدة الضحية", "لأن الجسم العطشان يمتص السوائل فوراً ولا يبقيها سائلة", "لأن الماء البارد في المعدة يغير درجة حرارة الجسم كلياً"], a: 1, w: "الجسم المجهد عطشاً يمتص السائل فوراً؛ بقاؤه دليل قتل."},
+        {q: "ادعى رجل سرقة حقيبته في مترو لندن ليلة الجمعة الساعة 3 فجراً. لماذا كشفوه؟", o: ["لأن معظم خطوط المترو العالمية تغلق للصيانة بعد منتصف الليل", "لأن الحقيبة كانت فارغة ولا يوجد سبب منطقي لسرقتها نهائياً", "لأن اللصوص لا يعملون في الساعات المتأخرة من ليلة الجمعة"], a: 0, w: "المترو يغلق للصيانة ليلاً، فلا يوجد زحام ولا قطارات."},
+        {q: "وجدت جثة في الثلج دون آثار أقدام حولها رغم عدم تساقط الثلج حديثاً. كيف؟", o: ["لأن القاتل استخدم حبالاً طويلة لسحب الجثة من مسافة بعيدة", "لأن الرياح القوية مسحت آثار أقدام القاتل والضحية معاً", "لأن الجثة سقطت من طائرة كانت تحلق بارتفاع منخفض جداً"], a: 0, w: "سحب الجثة عن بعد يمنع ترك آثار أقدام حولها."},
+        {q: "مات في مكتبه وسجل رسالة: 'سأنتحر' ثم طلقة وصمت. لماذا هي جريمة قتل؟", o: ["لأن المنتحر لا يستطيع ضغط زر إيقاف المسجل بعد موته فوراً", "لأن الطلقة كانت بعيدة عن الميكروفون ولم تظهر بوضوح كافٍ", "لأن نبرة الصوت في التسجيل كانت هادئة ولا تدل على الخوف"], a: 0, w: "إيقاف المسجل يتطلب وجود شخص حي بعد الطلقة."},
+        {q: "لص كسر زجاج نافذة 'للخارج'. من أين جاءت الضربة حسب تحليل المختبر؟", o: ["جاءت من الخارج لأن الزجاج يتناثر دائماً بعيداً عن المصدر", "جاءت من الداخل لأن اتجاه تناثر الزجاج يتبع قوة الدفع دائماً", "جاءت من الأعلى بسبب ضغط الهواء القوي الناتج عن العاصفة"], a: 1, w: "الزجاج يتناثر للخارج إذا كانت الضربة من داخل البيت."},
     ];
 
-    for(let i=0; i<70; i++) {
-        let level = i < 24 ? 10 : (i < 48 ? 20 : 30);
-        let base = scenarios[i % scenarios.length];
-        db[level].push({
-            q: `[قضية ${i+1}] ${base.q}`,
-            o: base.o, a: base.a, w: base.w
+    for(let i=0; i<210; i++) {
+        let lvl = i < 70 ? 10 : (i < 140 ? 20 : 30);
+        let s = pool[i % pool.length];
+        db[lvl].push({
+            q: `[قضية ${i+1}] ${s.q}`,
+            o: s.o, a: s.a, w: s.w
         });
     }
     return db;
@@ -89,7 +90,7 @@ const generateDB = () => {
 const questions = generateDB();
 
 function startGame() {
-    names = [document.getElementById('t1').value || "المحقق 1", document.getElementById('t2').value || "المحقق 2"];
+    names = [document.getElementById('t1').value || "فريق 1", document.getElementById('t2').value || "فريق 2"];
     document.getElementById('n1').innerText = names[0];
     document.getElementById('n2').innerText = names[1];
     document.getElementById('setup').style.display = 'none';
@@ -99,7 +100,7 @@ function startGame() {
 
 function loadQ(p) {
     let pool = questions[p].filter((_, i) => !used[p].includes(i));
-    if(pool.length === 0) { alert("انتهت القضايا!"); return; }
+    if(pool.length === 0) { alert("انتهت ملفات هذا المستوى!"); return; }
     let idx = Math.floor(Math.random() * pool.length);
     let rIdx = questions[p].indexOf(pool[idx]);
     used[p].push(rIdx);
@@ -111,11 +112,16 @@ function loadQ(p) {
     document.getElementById('next').style.display = 'none';
     let box = document.getElementById('options');
     box.innerHTML = "";
-    window.curr.o.forEach((v, i) => {
+    
+    // ترتيب عشوائي للخيارات لضمان عدم وجود نمط
+    let opts = window.curr.o.map((v, i) => ({v, i}));
+    opts.sort(() => Math.random() - 0.5);
+
+    opts.forEach(obj => {
         let b = document.createElement('button');
         b.className = "opt-btn";
-        b.innerText = v;
-        b.onclick = () => check(i, p);
+        b.innerText = obj.v;
+        b.onclick = () => check(obj.i, p);
         box.appendChild(b);
     });
 }
@@ -125,17 +131,19 @@ function check(i, p) {
     e.style.display = 'block';
     document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
     if(i === window.curr.a) {
-        e.innerText = "✅ أصبت الثغرة: " + window.curr.w;
-        e.style.background = "#2ed573";
+        e.innerText = "✅ تحليل سليم: " + window.curr.w;
+        e.style.background = "rgba(46, 213, 115, 0.2)";
+        e.style.color = "#2ecc71";
         scores[turn] += p;
         confetti();
     } else {
-        e.innerText = "❌ خدعك القاتل: " + window.curr.w;
-        e.style.background = "#ff4757";
+        e.innerText = "❌ تحليل خاطئ: " + window.curr.w;
+        e.style.background = "rgba(255, 71, 87, 0.2)";
+        e.style.color = "#ff4757";
     }
     document.getElementById('next').style.display = 'block';
     update();
-    if(scores[turn] >= 200) win(); // رفعت الفوز لـ 200 عشان الأسئلة كثيرة
+    if(scores[turn] >= 200) win();
 }
 
 function next() {
