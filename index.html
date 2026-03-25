@@ -6,8 +6,15 @@
     <title>مسابقة حروف المطورة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@700&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #0d6efd;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --dark-color: #212529;
+        }
+
         body { 
             font-family: 'Tajawal', sans-serif; 
             background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); 
@@ -15,119 +22,134 @@
         }
 
         .game-container {
-            display: grid; grid-template-columns: 1fr 300px 320px;
-            gap: 20px; padding: 20px; max-width: 1400px; margin: 0 auto;
+            display: grid; grid-template-columns: 1fr 320px;
+            gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto;
         }
 
-        /* استخدام الصورة المرفقة كخلفية للوحة */
-        .board-wrapper {
-            background-image: url('IMG_1493.webp');
-            background-size: 100% 100%;
-            background-position: center;
-            background-repeat: no-repeat;
-            padding: 40px; border-radius: 20px; border: 8px solid #facc15;
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3); position: relative;
+        /* تصميم خلية الحروف المعتمد على الكود الجديد */
+        .hex-table {
+            overflow: hidden;
+            background-color: var(--dark-color);
+            border-radius: 1rem;
+            padding: 20px 0;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border: 5px solid #facc15;
         }
 
-        .hex-grid { display: flex; flex-direction: column; align-items: center; }
-        .hex-row { display: flex; margin-bottom: -18px; }
-        .hex-row:nth-child(even) { transform: translateX(33px); }
+        .hex-row {
+            display: flex;
+            flex-wrap: nowrap;
+            margin-left: -2%;
+            margin-right: -2%;
+            justify-content: center;
+        }
 
-        .hexagon {
-            width: 65px; height: 75px; background: white;
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        .hex {
+            font-family: 'El Messiri', sans-serif;
+            position: relative;
+            width: 12%;
+            padding: 4.5% 0;
+            background-color: #FDFFCD;
+            margin: .15rem calc(0.8% + .1rem);
+            font-size: clamp(1rem, 4vw, 2.5rem);
+            text-align: center;
+            line-height: 0;
+            color: #212529;
+            cursor: pointer;
+            transition: transform 0.2s;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.2s; font-size: 1.8rem; font-weight: 900;
-            color: #312e81; margin: 2px; border: 1px solid #312e81;
         }
 
-        .state-1 { background: #facc15 !important; color: black; } 
-        .state-2 { background: #22c55e !important; color: white; } 
-        .state-3 { background: #f97316 !important; color: white; } 
-
-        .question-box {
-            background: linear-gradient(to bottom, #ef4444, #b91c1c);
-            border-radius: 30px; padding: 30px; text-align: center;
-            display: flex; flex-direction: column; justify-content: space-between;
-            border: 4px solid rgba(255,255,255,0.2);
+        .hex:nth-child(even) {
+            margin-top: -4.5%;
+            margin-bottom: calc(4.5% + 0.3rem);
         }
+
+        .hex:before, .hex:after {
+            content: ""; position: absolute; top: 0; width: 22%; height: 100%;
+            background: inherit; transition: inherit; z-index: -1;
+        }
+        .hex:before { left: -20%; clip-path: polygon(90% 0, 100% 0%, 100% 100%, 90% 100%, 0% 50%); }
+        .hex:after { right: -20%; clip-path: polygon(0 0, 10% 0, 100% 50%, 10% 100%, 0 100%); }
+
+        /* تلوين الصفوف والأعمدة حسب التصميم */
+        .hex-row:first-of-type .hex, .hex-row:last-of-type .hex { background-color: #0aad56 !important; color: transparent; cursor: default; }
+        .hex-row .hex:first-of-type, .hex-row .hex:last-of-type { background-color: #ff4400 !important; color: transparent; cursor: default; }
+
+        /* حالات اللعب */
+        .hex.active-green { background-color: #38a169 !important; color: white !important; }
+        .hex.active-orange { background-color: #f97316 !important; color: white !important; }
+        .hex.active-yellow { background-color: #facc15 !important; color: black !important; }
 
         .side-menu { display: flex; flex-direction: column; gap: 15px; }
-        .score-card { border-radius: 20px; padding: 15px; text-align: center; font-weight: 900; }
+        .score-card { border-radius: 20px; padding: 20px; text-align: center; font-weight: 900; }
 
         .overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
             display: none; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 3000; text-align: center; pointer-events: none;
+            z-index: 5000; text-align: center;
         }
-        .show-overlay { display: flex; animation: fadeIn 0.5s forwards; }
+        .show-overlay { display: flex; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        @media (max-width: 1024px) {
+        @media (max-width: 900px) {
             .game-container { grid-template-columns: 1fr; }
-            .hexagon { width: 55px; height: 64px; font-size: 1.5rem; }
-            .hex-row:nth-child(even) { transform: translateX(28px); }
+            .hex { width: 13%; padding: 5.5% 0; }
         }
     </style>
 </head>
 <body>
 
-    <div id="setup-screen" class="fixed inset-0 z-[4000] bg-[#0a0412] flex items-center justify-center p-4">
-        <div class="bg-white/10 backdrop-blur-3xl p-10 rounded-[3rem] border border-white/20 text-center w-full max-w-md shadow-2xl">
-            <h1 class="text-3xl font-black text-yellow-500 mb-6">إعداد المسابقة</h1>
-            <input type="text" id="game-title-input" placeholder="اسم المسابقة" class="w-full p-4 mb-4 rounded-2xl bg-black/60 border border-white/20 text-white text-center outline-none">
+    <div id="setup-screen" class="fixed inset-0 z-[6000] bg-[#0a0412] flex items-center justify-center p-4">
+        <div class="bg-white/10 backdrop-blur-3xl p-10 rounded-[3rem] border border-white/20 text-center w-full max-w-md">
+            <h1 class="text-3xl font-black text-yellow-500 mb-6 italic">إعداد المسابقة</h1>
+            <input type="text" id="game-title-input" placeholder="اسم المسابقة" class="w-full p-4 mb-4 rounded-2xl bg-black/60 border border-white/20 text-white text-center">
             <div class="grid grid-cols-2 gap-4 mb-8">
-                <input type="text" id="team1-name-input" value="الفريق الأخضر" class="p-3 rounded-xl bg-green-900/40 border border-green-500 text-white text-center font-bold">
-                <input type="text" id="team2-name-input" value="الفريق البرتقالي" class="p-3 rounded-xl bg-orange-900/40 border border-orange-500 text-white text-center font-bold">
+                <input type="text" id="team1-name-input" value="الأخضر" class="p-3 rounded-xl bg-green-900/40 border border-green-500 text-white text-center font-bold">
+                <input type="text" id="team2-name-input" value="البرتقالي" class="p-3 rounded-xl bg-orange-900/40 border border-orange-500 text-white text-center font-bold">
             </div>
-            <button onclick="startGame()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl text-xl hover:scale-105 transition">ابدأ اللعب</button>
+            <button onclick="startGame()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl text-xl transition hover:scale-105">ابدأ اللعب</button>
         </div>
     </div>
 
-    <header class="p-4 flex justify-between items-center bg-black/10">
-        <div class="flex gap-3">
-            <button onclick="location.reload()" class="bg-purple-600 px-4 py-2 rounded-full text-sm font-bold">لعبة جديدة</button>
-        </div>
-        <div class="text-xl font-black text-yellow-400" id="main-title">حروف</div>
+    <header class="p-4 flex justify-between items-center bg-black/20">
+        <button onclick="location.reload()" class="bg-white/10 px-4 py-2 rounded-lg font-bold">جولة جديدة</button>
+        <div id="main-title" class="text-2xl font-black text-yellow-400 italic">مسابقة حروف</div>
+        <div id="round-label" class="bg-yellow-500 text-black px-4 py-1 rounded-full font-bold">الجولة 1</div>
     </header>
 
     <div class="game-container">
-        <div class="board-wrapper">
-            <div id="grid-main" class="hex-grid"></div>
-        </div>
-
-        <div class="question-box">
-            <div class="bg-white/20 w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl font-black mb-4" id="current-letter">-</div>
-            <div class="text-sm opacity-80 mb-2" id="round-label">الجولة الأولى</div>
-            <div class="text-xl font-bold leading-relaxed" id="question-text">اضغط على حرف لبدء السؤال..</div>
-            <button class="mt-8 bg-white/20 py-3 rounded-full font-black hover:bg-white/30 transition">اضغط للإجابة</button>
-        </div>
+        <div id="hex-board" class="hex-table">
+            </div>
 
         <div class="side-menu">
-            <div class="score-card bg-green-600">
-                <div class="text-lg" id="t1-display">الفريق الأخضر</div>
-                <div class="text-4xl" id="score1">0 فوز</div>
+            <div class="score-card bg-green-600 border-b-4 border-green-800 shadow-lg">
+                <div id="t1-name" class="text-sm opacity-80">الفريق الأخضر</div>
+                <div id="score1" class="text-5xl font-black">0</div>
             </div>
-            <div class="score-card bg-orange-600">
-                <div class="text-lg" id="t2-display">الفريق البرتقالي</div>
-                <div class="text-4xl" id="score2">0 فوز</div>
+            <div class="score-card bg-orange-600 border-b-4 border-orange-800 shadow-lg">
+                <div id="t2-name" class="text-sm opacity-80">الفريق البرتقالي</div>
+                <div id="score2" class="text-5xl font-black">0</div>
             </div>
-            <button onclick="shuffleGrid()" class="bg-white/10 p-4 rounded-xl font-bold">🎲 توزيع عشوائي</button>
-            <button onclick="clearBoard()" class="bg-white/10 p-4 rounded-xl font-bold text-red-300">🗑️ تفريغ اللوحة</button>
+            
+            <div class="bg-red-600 p-6 rounded-3xl text-center shadow-xl">
+                <div id="current-letter" class="text-6xl font-black mb-2">-</div>
+                <p class="text-xs opacity-70">الحرف الحالي</p>
+            </div>
+
+            <button onclick="renderGrid()" class="bg-white/10 p-4 rounded-xl font-bold hover:bg-white/20">🎲 توزيع الحروف</button>
+            <button onclick="clearBoard()" class="bg-red-500/20 p-4 rounded-xl font-bold text-red-400 hover:bg-red-500/40">🗑️ تفريغ اللوحة</button>
         </div>
     </div>
 
     <div id="win-overlay" class="overlay">
-        <h1 id="win-msg-main" class="text-6xl font-black text-yellow-400 mb-4 italic"></h1>
+        <h1 id="win-msg-main" class="text-7xl font-black text-yellow-400 mb-6"></h1>
         <h2 id="win-msg-sub" class="text-4xl font-bold text-white"></h2>
     </div>
 
-    <audio id="final-win-audio" src="https://raw.githubusercontent.com/iMans9/mp3/main/win.mp3"></audio>
+    <audio id="final-win-audio" src="win.mp3"></audio>
 
     <script>
-        const letters = "أبتثجحخدذرزسشصضطظعغفقلمنهوي".split("");
+        const allLetters = "أبتثجحخدذرزسشصضطظعغفقلمنهوي".split("");
         let score1 = 0, score2 = 0, roundIdx = 1, isLocked = false, gridData = [];
         let team1Name = "", team2Name = "";
 
@@ -135,38 +157,56 @@
             team1Name = document.getElementById('team1-name-input').value || "الأخضر";
             team2Name = document.getElementById('team2-name-input').value || "البرتقالي";
             document.getElementById('main-title').innerText = document.getElementById('game-title-input').value || "حروف";
-            document.getElementById('t1-display').innerText = team1Name;
-            document.getElementById('t2-display').innerText = team2Name;
+            document.getElementById('t1-name').innerText = team1Name;
+            document.getElementById('t2-name').innerText = team2Name;
             document.getElementById('setup-screen').classList.add('hidden');
             renderGrid();
         }
 
         function renderGrid() {
-            const grid = document.getElementById('grid-main');
-            grid.innerHTML = ''; gridData = [];
-            let pool = [...letters].sort(() => 0.5 - Math.random()).slice(0, 25);
-            for (let r = 0; r < 5; r++) {
+            const board = document.getElementById('hex-board');
+            board.innerHTML = '';
+            gridData = [];
+            let letterPool = [...allLetters].sort(() => 0.5 - Math.random());
+
+            for (let r = 0; r < 7; r++) {
                 const row = document.createElement('div');
                 row.className = 'hex-row';
                 gridData[r] = [];
-                for (let c = 0; c < 5; c++) {
+                for (let c = 0; c < 7; c++) {
                     const hex = document.createElement('div');
-                    hex.className = 'hexagon';
-                    hex.innerText = pool[r * 5 + c];
-                    hex.dataset.state = "0";
-                    hex.onclick = () => {
-                        if(isLocked) return;
-                        document.getElementById('current-letter').innerText = hex.innerText;
-                        let s = (parseInt(hex.dataset.state) + 1) % 4;
-                        hex.dataset.state = s;
-                        hex.className = `hexagon state-${s}`;
-                        checkWinner();
-                    };
+                    hex.className = 'hex';
+                    
+                    // تحديد إذا كانت الخلية حرفاً أم جداراً (بناءً على الكود الذي زودتني به)
+                    const isEdgeRow = (r === 0 || r === 6);
+                    const isEdgeCol = (c === 0 || c === 6);
+
+                    if (!isEdgeRow && !isEdgeCol) {
+                        hex.innerText = letterPool.pop() || "-";
+                        hex.dataset.state = "0";
+                        hex.onclick = () => handleHexClick(hex, r, c);
+                    } else {
+                        hex.classList.add('edge');
+                    }
+                    
                     row.appendChild(hex);
                     gridData[r][c] = hex;
                 }
-                grid.appendChild(row);
+                board.appendChild(row);
             }
+        }
+
+        function handleHexClick(hex, r, c) {
+            if (isLocked) return;
+            document.getElementById('current-letter').innerText = hex.innerText;
+            let s = (parseInt(hex.dataset.state) + 1) % 4;
+            hex.dataset.state = s;
+            hex.className = 'hex'; // Reset
+            if (s === 1) hex.classList.add('active-yellow');
+            if (s === 2) hex.classList.add('active-green');
+            if (s === 3) hex.classList.add('active-orange');
+            
+            checkWinner();
         }
 
         function checkWinner() {
@@ -174,72 +214,91 @@
             else if (hasPath(3, 'horizontal')) announceRoundWin(2);
         }
 
-        function announceRoundWin(teamNum) {
-            isLocked = true;
-            const winnerName = teamNum === 1 ? team1Name : team2Name;
-            if(teamNum === 1) score1++; else score2++;
+        function hasPath(target, mode) {
+            const visited = new Set();
+            const stack = [];
             
-            document.getElementById('score1').innerText = `${score1} فوز`;
-            document.getElementById('score2').innerText = `${score2} فوز`;
+            // البداية للفريق الأخضر (رأسي من صف 1 لصف 5)
+            // البداية للفريق البرتقالي (أفقي من عمود 1 لعمود 5)
+            for (let i = 1; i <= 5; i++) {
+                let r = (mode === 'vertical') ? 1 : i;
+                let c = (mode === 'vertical') ? i : 1;
+                if (parseInt(gridData[r][c].dataset.state) === target) stack.push([r, c]);
+            }
+
+            while (stack.length > 0) {
+                const [r, c] = stack.pop();
+                const key = `${r},${c}`;
+                if (visited.has(key)) continue;
+                visited.add(key);
+
+                if ((mode === 'vertical' && r === 5) || (mode === 'horizontal' && c === 5)) return true;
+
+                const neighbors = getNeighbors(r, c);
+                for (let [nr, nc] of neighbors) {
+                    if (nr >= 1 && nr <= 5 && nc >= 1 && nc <= 5) {
+                        if (parseInt(gridData[nr][nc].dataset.state) === target) stack.push([nr, nc]);
+                    }
+                }
+            }
+            return false;
+        }
+
+        function getNeighbors(r, c) {
+            // منطق الجوار لخلية النحل
+            const evenRow = (r % 2 === 0);
+            return evenRow ? 
+                [[r-1, c], [r-1, c+1], [r, c-1], [r, c+1], [r+1, c], [r+1, c+1]] :
+                [[r-1, c-1], [r-1, c], [r, c-1], [r, c+1], [r+1, c-1], [r+1, c]];
+        }
+
+        function announceRoundWin(team) {
+            isLocked = true;
+            const winner = team === 1 ? team1Name : team2Name;
+            if (team === 1) score1++; else score2++;
+
+            document.getElementById('score1').innerText = score1;
+            document.getElementById('score2').innerText = score2;
 
             if (score1 === 2 || score2 === 2) {
-                const audio = document.getElementById('final-win-audio');
-                audio.play();
-                showWinOverlay("🏆 بطل المسابقة 🏆", winnerName, 11000);
-                startContinuousFireWorks(11000);
+                document.getElementById('final-win-audio').play();
+                showOverlay("🏆 بطل المسابقة 🏆", winner, 11000);
+                startConfetti(11000);
                 setTimeout(() => location.reload(), 11500);
             } else {
-                showWinOverlay(`الفائز بالجولة ${roundIdx}`, winnerName, 4000);
+                showOverlay(`الفائز بالجولة ${roundIdx}`, winner, 4000);
                 setTimeout(() => {
                     roundIdx++;
-                    document.getElementById('round-label').innerText = roundIdx === 3 ? "الجولة الفاصلة" : `الجولة ${roundIdx}`;
+                    document.getElementById('round-label').innerText = `الجولة ${roundIdx}`;
                     isLocked = false;
                     renderGrid();
                 }, 4000);
             }
         }
 
-        function showWinOverlay(main, sub, duration) {
+        function showOverlay(m, s, d) {
             const ov = document.getElementById('win-overlay');
-            document.getElementById('win-msg-main').innerText = main;
-            document.getElementById('win-msg-sub').innerText = sub;
+            document.getElementById('win-msg-main').innerText = m;
+            document.getElementById('win-msg-sub').innerText = s;
             ov.classList.add('show-overlay');
-            setTimeout(() => ov.classList.remove('show-overlay'), duration);
+            setTimeout(() => ov.classList.remove('show-overlay'), d);
         }
 
-        function startContinuousFireWorks(ms) {
-            var end = Date.now() + ms;
+        function startConfetti(ms) {
+            const end = Date.now() + ms;
             (function frame() {
-                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
-                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+                confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1 } });
                 if (Date.now() < end) requestAnimationFrame(frame);
             }());
         }
 
-        function hasPath(target, dir) {
-            const visited = new Set(); const stack = [];
-            for (let i = 0; i < 5; i++) {
-                let cell = (dir === 'vertical') ? gridData[0][i] : gridData[i][0];
-                if (parseInt(cell.dataset.state) === target) stack.push([dir === 'vertical' ? 0 : i, dir === 'vertical' ? i : 0]);
-            }
-            while (stack.length > 0) {
-                const [r, c] = stack.pop();
-                if (visited.has(`${r},${c}`)) continue; visited.add(`${r},${c}`);
-                if ((dir === 'vertical' && r === 4) || (dir === 'horizontal' && c === 4)) return true;
-                getNeighbors(r, c).forEach(([nr, nc]) => {
-                    if (gridData[nr] && gridData[nr][nc] && parseInt(gridData[nr][nc].dataset.state) === target) stack.push([nr, nc]);
-                });
-            }
-            return false;
+        function clearBoard() {
+            document.querySelectorAll('.hex:not(.edge)').forEach(h => {
+                h.className = 'hex';
+                h.dataset.state = "0";
+            });
         }
-
-        function getNeighbors(r, c) {
-            const offsets = (r % 2 === 0) ? [[-1,0], [-1,1], [0,-1], [0,1], [1,0], [1,1]] : [[-1,-1], [-1,0], [0,-1], [0,1], [1,-1], [1,0]];
-            return offsets.map(([dr, dc]) => [r + dr, c + dc]).filter(([nr, nc]) => nr >= 0 && nr < 5 && nc >= 0 && nc < 5);
-        }
-
-        function shuffleGrid() { if(!isLocked) renderGrid(); }
-        function clearBoard() { document.querySelectorAll('.hexagon').forEach(h => { h.className = 'hexagon'; h.dataset.state = "0"; }); }
     </script>
 </body>
 </html>
