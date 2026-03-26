@@ -2,174 +2,176 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>تحدي المحققين - نظام منع التكرار الجذري</title>
+    <title>تحدي المحققين - نظام التلميح ومنع التكرار</title>
     <style>
-        :root { --danger: #ff4757; --gold: #ffa502; --bg: #0a0a0b; --card: #1e1e26; --text: #f1f2f6; }
+        :root { --danger: #ff4757; --gold: #ffa502; --bg: #0f172a; --card: #1e293b; --text: #f1f2f6; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); direction: rtl; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { width: 95%; max-width: 700px; background: var(--card); padding: 30px; border-radius: 25px; box-shadow: 0 10px 50px rgba(0,0,0,0.7); text-align: center; border: 1px solid #333; }
-        .setup, .game, .win { display: none; }
-        .active { display: block; }
-        input { padding: 12px; border-radius: 10px; border: 1px solid #444; background: #000; color: #fff; width: 80%; margin-bottom: 15px; text-align: center; }
-        button { padding: 12px 25px; cursor: pointer; background: var(--danger); color: white; border: none; border-radius: 12px; font-weight: bold; margin: 5px; transition: 0.3s; }
-        .score-board { display: flex; justify-content: space-around; margin-bottom: 25px; }
-        .team-box { flex: 1; padding: 15px; border-radius: 15px; background: #2d3436; border: 3px solid transparent; }
-        .active-team { border-color: var(--gold); background: #1e293b; }
-        .pts { font-size: 2em; color: var(--gold); font-weight: 900; }
-        .story-box { background: #fff; color: #2d3436; padding: 25px; border-radius: 20px; text-align: right; margin: 20px 0; font-weight: 600; line-height: 1.8; border-right: 8px solid var(--danger); }
-        .opt-btn { width: 100%; text-align: right; background: #34495e; margin: 8px 0; color: #fff; border: none; border-radius: 10px; padding: 15px; cursor: pointer; }
-        .explanation { padding: 15px; border-radius: 10px; display: none; margin-top: 15px; font-weight: bold; }
-        .count-info { font-size: 0.8em; color: #888; margin-top: 10px; }
+        .container { width: 95%; max-width: 800px; text-align: center; }
+        
+        /* تصميم الخلية */
+        .hex-table { background: var(--card); padding: 30px; border-radius: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5); margin: 20px auto; }
+        .hex-row { display: flex; justify-content: center; margin-bottom: -4%; }
+        .hex { position: relative; width: 11%; padding: 4.5% 0; background: #FDFFCD; margin: 0.2rem 1%; font-size: 1.5rem; color: #111; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; }
+        .hex:before, .hex:after { content: ""; position: absolute; top: 0; width: 28%; height: 100%; background: inherit; }
+        .hex:before { left: -25%; clip-path: polygon(100% 0, 100% 100%, 0% 50%); }
+        .hex:after { right: -25%; clip-path: polygon(0 0, 0 100%, 100% 50%); }
+        
+        .hex.used { background: #475569 !important; color: #94a3b8 !important; cursor: default; }
+        .hex.green { background: #22c55e !important; color: white; }
+        .hex.red { background: #ef4444 !important; color: white; }
+
+        /* واجهة السؤال */
+        #q-box { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 550px; background: white; color: #1e293b; padding: 30px; border-radius: 20px; z-index: 100; box-shadow: 0 0 100px rgba(0,0,0,0.9); border: 4px solid var(--gold); }
+        .opt-btn { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #e2e8f0; border-radius: 10px; background: #f8fafc; cursor: pointer; font-weight: bold; font-size: 1rem; }
+        .opt-btn:hover { border-color: var(--gold); background: #fffbeb; }
+        .hint-btn { background: #8b5cf6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-bottom: 15px; font-weight: bold; }
+        
+        .score-box { display: flex; justify-content: space-around; margin-bottom: 20px; }
+        .team { padding: 15px; background: #1e293b; border-radius: 12px; flex: 1; margin: 0 10px; border: 3px solid transparent; }
+        .active-team { border-color: var(--gold); background: #334155; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 90; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1 style="color:var(--gold)">🔍 المحقق: النسخة غير القابلة للتكرار</h1>
-
-    <div id="setup" class="setup active">
-        <input type="text" id="t1" placeholder="اسم الفريق الأول">
-        <input type="text" id="t2" placeholder="اسم الفريق الثاني">
-        <br><button onclick="startGame()">ابدأ التحقيق الفعلي 📁</button>
+    <div class="score-box">
+        <div id="p1-box" class="team active-team">المحقق 1<br><b id="s1" style="font-size: 2em; color: var(--gold);">0</b></div>
+        <div id="p2-box" class="team">المحقق 2<br><b id="s2" style="font-size: 2em; color: var(--gold);">0</b></div>
     </div>
+    
+    <div class="hex-table" id="board"></div>
+    <p style="color: #94a3b8;">* الفوز من 150 نقطة | التلميح يخصم نصف النقاط</p>
+</div>
 
-    <div id="game" class="game">
-        <div class="score-board">
-            <div id="b1" class="team-box"><span id="n1"></span><br><span class="pts" id="s1">0</span></div>
-            <div id="b2" class="team-box"><span id="n2"></span><br><span class="pts" id="s2">0</span></div>
-        </div>
-
-        <div id="menu">
-            <h3>اختر مستوى التحدي:</h3>
-            <button style="background:#1e90ff" onclick="loadQ(10)">📁 جنحة (10ن) [<span id="c10">70</span> متبقي]</button>
-            <button style="background:#ffa502" onclick="loadQ(20)">📂 جريمة (20ن) [<span id="c20">70</span> متبقي]</button>
-            <button style="background:#8258fa" onclick="loadQ(30)">🗄️ لغز معقد (30ن) [<span id="c30">70</span> متبقي]</button>
-        </div>
-
-        <div id="display" style="display:none">
-            <div class="story-box" id="qText"></div>
-            <div id="options"></div>
-            <div id="exp" class="explanation"></div>
-            <button id="next" style="display:none; width:100%; background:#2ed573" onclick="next()">القضية التالية ⬅️</button>
-        </div>
+<div class="overlay" id="overlay"></div>
+<div id="q-box">
+    <div id="q-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <span id="points-badge" style="background:var(--gold); color:black; padding:5px 10px; border-radius:5px; font-weight:bold;">30 نقطة</span>
+        <button class="hint-btn" onclick="useHint()">💡 طلب تلميح (-50%)</button>
     </div>
-
-    <div id="win" class="win">
-        <h2 id="wName"></h2>
-        <button onclick="location.reload()">إعادة التحدي</button>
-    </div>
+    <h3 id="qText" style="line-height:1.6; text-align:right;"></h3>
+    <p id="hint-text" style="display:none; background:#ede9fe; color:#5b21b6; padding:10px; border-radius:8px; font-style:italic; margin-bottom:15px;"></p>
+    <div id="options"></div>
+    <div id="explanation" style="margin-top:15px; font-weight:bold; display:none; padding:15px; border-radius:10px;"></div>
+    <button id="close-btn" class="opt-btn" style="background:#22c55e; color:white; display:none; border:none;" onclick="closeQ()">متابعة التحقيق ⬅️</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 <script>
-let scores = [0,0], turn = 0, names = [];
-let db = { 10: [], 20: [], 30: [] };
+let scores = [0, 0], turn = 0, currentQPoints = 30;
+const letters = "أبتثجحخدذرزسشصضطظعغفقكلمنهوي".split("");
 
-// دالة بناء قاعدة البيانات (210 سؤال فريد)
-const initDB = () => {
-    const rawPool = [
-        {q: "وُجدت جثة بمعدتها لتر ماء لم يهضم رغم ادعاء موته عطشاً في الصحراء. كيف عرفوا؟", o: ["لأن الجسم العطشان يمتص السوائل فوراً ولا يبقيها سائلة", "لأن الماء في الصحراء يتبخر بسرعة داخل معدة الضحية", "لأن الماء البارد في المعدة يغير درجة حرارة الجسم كلياً"], a: 0, w: "المنطق الجنائي: الجسم العطشان يمتص الماء فوراً؛ وجوده سائلاً دليل قتل."},
-        {q: "مات في مكتبه وسجل رسالة: 'سأنتحر' ثم طلقة وصمت. لماذا هي جريمة قتل؟", o: ["لأن المنتحر لا يستطيع ضغط زر إيقاف المسجل بعد موته فوراً", "لأن الطلقة كانت بعيدة عن الميكروفون ولم تظهر بوضوح كافٍ", "لأن نبرة الصوت في التسجيل كانت هادئة ولا تدل على الخوف"], a: 0, w: "المنطق: إيقاف المسجل بعد الطلقة مستحيل للمنتحر."},
-        {q: "ادعى رجل سرقة حقيبته في مترو لندن ليلة الجمعة الساعة 3 فجراً. لماذا كشفوه؟", o: ["لأن معظم خطوط المترو العالمية تغلق للصيانة بعد منتصف الليل", "لأن الحقيبة كانت فارغة ولا يوجد سبب منطقي لسرقتها نهائياً", "لأن اللصوص لا يعملون في الساعات المتأخرة من ليلة الجمعة"], a: 0, w: "الواقع: المترو يغلق للصيانة ليلاً، فلا قطارات ولا زحام."},
-        {q: "لص كسر زجاج نافذة 'للخارج'. من أين جاءت الضربة حسب تحليل المختبر؟", o: ["جاءت من الخارج لأن الزجاج يتناثر دائماً بعيداً عن المصدر", "جاءت من الداخل لأن اتجاه تناثر الزجاج يتبع قوة الدفع دائماً", "جاءت من الأعلى بسبب ضغط الهواء القوي الناتج عن العاصفة"], a: 1, w: "الفيزياء: الزجاج يطير للخارج إذا كانت الضربة من الداخل."},
-        {q: "شاهد ادعى سماع طلقة مسدس من خلف 'جدار عازل للصوت' تماماً. لماذا هو كاذب؟", o: ["لأن الجدران العازلة تمنع عبور الترددات الصوتية تماماً", "لأن المسدس كان صامتاً ولا يمكن سماعه حتى بدون جدار", "لأن الشاهد كان يقف في مكان بعيد جداً عن مسرح الجريمة"], a: 0, w: "البديهية: الجدار العازل يمنع تسرب الصوت للخارج نهائياً."},
-        {q: "وُجد ميت في مكتبه والمدفأة تعمل بأقصى طاقتها في 'عز الصيف'. لماذا يشك المحقق؟", o: ["لأن الحرارة العالية تسرع تجمد الجثة لتضليل وقت الوفاة", "لأن الصيف حار والضحية كان يلبس ملابس ثقيلة جداً", "لأن المدفأة قد تنفجر وتسبب حريقاً كبيراً في المكتب"], a: 0, w: "الطب الشرعي: الحرارة تسرع التحلل والتصلب لخداع المحققين."},
-        {q: "رسالة انتحار مكتوبة بالكمبيوتر وموقعة باليد. لماذا قبضوا على المشتبه به؟", o: ["لأن الكتابة بالكمبيوتر لا تعبر عن الحالة النفسية أبداً", "لأن القاتل قد يطبع الرسالة ويجبر الضحية على توقيعها", "لأن التوقيع باليد على الورق المطبوع لا يعتبر دليلاً رسمياً"], a: 1, w: "التحقيق: القتلة يطبعون الرسائل لإخفاء تزوير الخط."},
-        {q: "وجدت جثة في الثلج دون آثار أقدام حولها رغم عدم تساقط الثلج حديثاً. كيف؟", o: ["لأن القاتل استخدم حبالاً طويلة لسحب الجثة من مسافة بعيدة", "لأن الرياح القوية مسحت آثار أقدام القاتل والضحية معاً", "لأن الجثة سقطت من طائرة كانت تحلق بارتفاع منخفض جداً"], a: 0, w: "التكنيك: سحب الجثة عن بعد يمنع ترك آثار أقدام القاتل."},
-    ];
+// مخزن القضايا الحقيقية (لضمان عدم التكرار والسهولة)
+const rawPuzzles = [
+    {q: "وُجد مقتولاً وبجانبه مسجل صوت. عند الضغط على زر التشغيل: 'أنا أنتحر' ثم طلقة. لماذا قبضوا على القاتل؟", h: "فكر في كيفية إيقاف التسجيل بعد الموت.", o: ["لأن التسجيل لا يعتبر دليلاً", "لأن المنتحر لا يستطيع ضغط زر الإيقاف بعد إطلاق النار", "لأن صوته كان حزيناً"], a: 1, w: "المنتحر يموت فوراً، فمن الذي أوقف المسجل؟ القاتل طبعاً!"},
+    {q: "ادعى رجل أنه صور الجريمة من خلف نافذة عليها 'بخار كثيف'. لماذا كذب؟", h: "ماذا يحدث للبخار عند لمسه أو التصوير خلفه؟", o: ["لأن الكاميرا لا تعمل في البرد", "لأن البخار يشتت الضوء ويمنع الرؤية الواضحة تماماً", "لأن البخار يختفي بسرعة"], a: 1, w: "البخار الكثيف يجعل الزجاج معتماً ولا يمكن التعرف على الملامح من خلفه."},
+    {q: "جثة في الصحراء وبمعدتها ماء بارد جداً رغم أن درجة الحرارة 50. كيف كشفوا القاتل؟", h: "فكر في درجة حرارة الجسم الطبيعية والامتصاص.", o: ["الماء يبرد الجسم دائماً", "الجسم العطشان يمتص الماء فوراً ويجعله بحرارة الجسم", "لأن القاتل جلب ماءً من الثلاجة"], a: 1, w: "لو مات عطشاً لامتص جسمه الماء؛ بقاؤه بارداً يعني أنه قُتل ثم سُقي الماء لتضليل الوقت."},
+    {q: "مات في مكتبه والمدفأة تعمل بأقصى طاقتها في عز الصيف. ما هو هدف القاتل؟", h: "الحرارة ماذا تفعل في سرعة تحلل الأنسجة؟", o: ["لتدفئة المكتب", "لتسريع تحلل الجثة وتضليل وقت الوفاة الحقيقي", "لإخفاء البصمات بالحرارة"], a: 1, w: "الحرارة العالية تسرع 'تصلب الجثة' مما يخدع الطبيب الشرعي في تحديد ساعة الموت."},
+    {q: "رجل ادعى سرقة حقيبته في مترو لندن الساعة 3 فجراً. لماذا قبضوا عليه؟", h: "هل المترو يعمل 24 ساعة في كل المدن؟", o: ["لا يوجد لصوص فجراً", "لأن المترو يغلق للصيانة في هذا الوقت ولا يوجد ركاب", "لأن الحقيبة كانت ثقيلة"], a: 1, w: "معظم خطوط المترو العالمية تغلق بعد منتصف الليل، فادعاء الزحام والسرقة كذبة."},
+    {q: "وجدت بصمات القاتل على 'مقبض الباب من الداخل' فقط. لماذا هو المتهم الأول؟", h: "كيف دخل وخرج دون لمس المقبض من الخارج؟", o: ["لأن بصماته واضحة", "لأنه مسح بصماته من الخارج ونسي الداخل وهو يهرب", "لأنه لم يلبس قفازات"], a: 1, w: "مسح الخارج ونسيان الداخل هو خطأ شائع يثبت وجوده في مسرح الجريمة."},
+    {q: "مات شخص مسموماً بالملح. المشتبه به أكل من نفس الطعام ولم يمت. كيف؟", h: "فكر في طريقة وضع الملح في الصحن.", o: ["لأن لديه مناعة", "لأن القاتل وضع السم في مملحة الضحية الخاصة فقط", "لأن السم مفعوله بطيء"], a: 1, w: "تخصيص السم في أدوات الضحية الشخصية (المملحة) ينجي القاتل."}
+];
 
-    // ملء الفئات بـ 70 سؤال لكل واحدة (تكرار القالب بمتغيرات فريدة)
-    for(let i=0; i<210; i++) {
-        let level = i < 70 ? 10 : (i < 140 ? 20 : 30);
-        let s = rawPool[i % rawPool.length];
-        db[level].push({ ...s, id: i, q: `[قضية #${i+1}] ${s.q}` });
+// دالة توزيع الأسئلة على الحروف بدون تكرار
+function getPuzzle() {
+    if (rawPuzzles.length === 0) return {q: "انتهت القضايا!", o: ["-"], a:0, w: "لا يوجد"};
+    const idx = Math.floor(Math.random() * rawPuzzles.length);
+    return rawPuzzles.splice(idx, 1)[0]; // حذف السؤال فور اختياره
+}
+
+function initBoard() {
+    const board = document.getElementById('board');
+    let lIdx = 0;
+    for (let r = 0; r < 5; r++) {
+        const row = document.createElement('div');
+        row.className = 'hex-row';
+        for (let c = 0; c < 6; c++) {
+            if (lIdx < letters.length) {
+                const hex = document.createElement('div');
+                hex.className = 'hex';
+                hex.innerText = letters[lIdx];
+                const p = getPuzzle();
+                hex.onclick = () => openQ(hex, p);
+                row.appendChild(hex);
+                lIdx++;
+            }
+        }
+        board.appendChild(row);
     }
-};
-
-initDB();
-
-function startGame() {
-    names = [document.getElementById('t1').value || "فريق 1", document.getElementById('t2').value || "فريق 2"];
-    document.getElementById('n1').innerText = names[0];
-    document.getElementById('n2').innerText = names[1];
-    document.getElementById('setup').style.display = 'none';
-    document.getElementById('game').style.display = 'block';
-    updateCounters();
 }
 
-function loadQ(p) {
-    if(db[p].length === 0) return alert("نفدت القضايا في هذا المستوى!");
+function openQ(hex, p) {
+    if (hex.classList.contains('used')) return;
+    window.currentHex = hex;
+    window.currentPuzzle = p;
+    currentQPoints = 30;
     
-    // سحب السؤال وحذفه فوراً من المصفوفة (No Repetition)
-    let idx = Math.floor(Math.random() * db[p].length);
-    window.curr = db[p].splice(idx, 1)[0]; 
-
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('display').style.display = 'block';
-    document.getElementById('qText').innerText = window.curr.q;
-    document.getElementById('exp').style.display = 'none';
-    document.getElementById('next').style.display = 'none';
+    document.getElementById('points-badge').innerText = "30 نقطة";
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('q-box').style.display = 'block';
+    document.getElementById('qText').innerText = p.q;
+    document.getElementById('hint-text').style.display = 'none';
+    document.getElementById('explanation').style.display = 'none';
+    document.getElementById('close-btn').style.display = 'none';
     
-    let box = document.getElementById('options');
-    box.innerHTML = "";
-    
-    let opts = window.curr.o.map((v, i) => ({v, i}));
-    opts.sort(() => Math.random() - 0.5);
-
-    opts.forEach(obj => {
-        let b = document.createElement('button');
-        b.className = "opt-btn";
-        b.innerText = obj.v;
-        b.onclick = () => check(obj.i, p);
-        box.appendChild(b);
+    const optDiv = document.getElementById('options');
+    optDiv.innerHTML = "";
+    p.o.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerText = opt;
+        btn.onclick = () => checkAns(i);
+        optDiv.appendChild(btn);
     });
-    updateCounters();
 }
 
-function check(i, p) {
-    let e = document.getElementById('exp');
-    e.style.display = 'block';
+function useHint() {
+    const hint = document.getElementById('hint-text');
+    hint.innerText = "💡 تلميح: " + window.currentPuzzle.h;
+    hint.style.display = 'block';
+    currentQPoints = 15; // خصم النصف
+    document.getElementById('points-badge').innerText = "15 نقطة (تلميح مفعل)";
+}
+
+function checkAns(selected) {
+    const exp = document.getElementById('explanation');
+    exp.style.display = 'block';
     document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
-    if(i === window.curr.a) {
-        e.innerText = "✅ تحليل سليم: " + window.curr.w;
-        e.style.background = "rgba(46, 213, 115, 0.2)";
-        e.style.color = "#2ecc71";
-        scores[turn] += p;
+    
+    if (selected === window.currentPuzzle.a) {
+        exp.innerText = "✅ أصبت! " + window.currentPuzzle.w;
+        exp.style.background = "#dcfce7"; exp.style.color = "#166534";
+        scores[turn] += currentQPoints;
+        window.currentHex.classList.add('green');
         confetti();
     } else {
-        e.innerText = "❌ تحليل خاطئ: " + window.curr.w;
-        e.style.background = "rgba(255, 71, 87, 0.2)";
-        e.style.color = "#ff4757";
+        exp.innerText = "❌ أخطأت! " + window.currentPuzzle.w;
+        exp.style.background = "#fee2e2"; exp.style.color = "#991b1b";
+        window.currentHex.classList.add('red');
     }
-    document.getElementById('next').style.display = 'block';
-    updateScore();
-    if(scores[turn] >= 200) win();
+    
+    window.currentHex.classList.add('used');
+    document.getElementById('close-btn').style.display = 'block';
+    updateUI();
+    if (scores[turn] >= 150) alert("🏆 مبروك! فاز الفريق " + (turn + 1));
 }
 
-function next() {
+function closeQ() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('q-box').style.display = 'none';
     turn = 1 - turn;
-    document.getElementById('menu').style.display = 'block';
-    document.getElementById('display').style.display = 'none';
-    updateScore();
+    updateUI();
 }
 
-function updateCounters() {
-    document.getElementById('c10').innerText = db[10].length;
-    document.getElementById('c20').innerText = db[20].length;
-    document.getElementById('c30').innerText = db[30].length;
-}
-
-function updateScore() {
+function updateUI() {
     document.getElementById('s1').innerText = scores[0];
     document.getElementById('s2').innerText = scores[1];
-    document.getElementById('b1').className = turn === 0 ? "team-box active-team" : "team-box";
-    document.getElementById('b2').className = turn === 1 ? "team-box active-team" : "team-box";
+    document.getElementById('p1-box').className = turn === 0 ? "team active-team" : "team";
+    document.getElementById('p2-box').className = turn === 1 ? "team active-team" : "team";
 }
 
-function win() {
-    document.getElementById('game').style.display = 'none';
-    document.getElementById('win').style.display = 'block';
-    document.getElementById('wName').innerText = "🏆 المحقق الأسطوري: " + names[turn];
-}
+initBoard();
 </script>
 </body>
 </html>
