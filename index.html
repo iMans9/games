@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مسابقة حروف - التصميم المطور</title>
+    <title>مسابقة حروف - النسخة الاحترافية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@700&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
@@ -32,12 +32,14 @@
             display: flex; flex-direction: column; align-items: center;
             border: 4px solid rgba(255,255,255,0.1);
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            background-image: url('IMG_1493.webp');
+            background-size: cover; background-blend-mode: overlay;
         }
 
         .hex-row {
             display: flex;
             justify-content: center;
-            margin-top: -18px; /* تداخل خلية النحل */
+            margin-top: -18px; 
         }
 
         .hex {
@@ -53,15 +55,14 @@
             user-select: none;
         }
 
-        /* إزاحة الصفوف الزوجية لضبط شكل الخلية */
+        /* إزاحة الصفوف الزوجية */
         .hex-row:nth-child(even) { transform: translateX(39px); }
 
-        /* الألوان عند التفعيل */
-        .hex.active-yellow { background-color: var(--hex-yellow) !important; color: #000; box-shadow: 0 0 15px var(--hex-yellow); }
+        .hex.active-yellow { background-color: var(--hex-yellow) !important; color: #000; }
         .hex.active-green { background-color: var(--hex-green) !important; color: #fff; }
         .hex.active-orange { background-color: var(--hex-orange) !important; color: #fff; }
 
-        /* الجدران المطلوبة (5 فوق و5 تحت خضراء، و5 يمين ويسار برتقالية) */
+        /* جدران 6 خلايا */
         .hex.edge-green { background-color: #0aad56 !important; color: transparent !important; cursor: default; }
         .hex.edge-orange { background-color: #ff4400 !important; color: transparent !important; cursor: default; }
         .hex.empty { visibility: hidden; pointer-events: none; }
@@ -86,21 +87,21 @@
 <body>
 
     <div id="setup-screen" class="fixed inset-0 z-[6000] bg-[#0f172a] flex items-center justify-center p-6 text-center">
-        <div class="bg-white/5 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 w-full max-w-lg">
+        <div class="bg-white/5 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 w-full max-w-lg shadow-2xl">
             <h1 class="text-3xl font-black text-yellow-400 mb-6 italic">إعداد المواجهة</h1>
-            <input type="text" id="game-title-input" placeholder="عنوان المسابقة" class="w-full p-4 mb-4 rounded-2xl bg-black/40 border border-white/10 text-white text-center">
+            <input type="text" id="game-title-input" placeholder="عنوان المسابقة" class="w-full p-4 mb-4 rounded-2xl bg-black/40 border border-white/10 text-white text-center text-xl outline-none focus:border-yellow-500">
             <div class="grid grid-cols-2 gap-4 mb-8">
-                <input type="text" id="team1-name-input" value="الأخضر" class="p-3 rounded-xl bg-green-900/20 border border-green-500 text-white text-center font-bold">
-                <input type="text" id="team2-name-input" value="البرتقالي" class="p-3 rounded-xl bg-orange-900/20 border border-orange-500 text-white text-center font-bold">
+                <input type="text" id="team1-name-input" value="صقور الجو" class="p-3 rounded-xl bg-green-900/20 border border-green-500 text-white text-center font-bold">
+                <input type="text" id="team2-name-input" value="نمور الأرض" class="p-3 rounded-xl bg-orange-900/20 border border-orange-500 text-white text-center font-bold">
             </div>
-            <button onclick="startGame()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-2xl text-2xl transition hover:scale-105">انطلاق</button>
+            <button onclick="startGame()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black py-4 rounded-2xl text-2xl transition transform hover:scale-105 shadow-xl">انطلاق المسابقة</button>
         </div>
     </div>
 
-    <header class="p-4 flex justify-between items-center bg-black/30">
-        <div id="round-label" class="bg-indigo-600 px-6 py-1 rounded-full font-bold">الجولة 1</div>
+    <header class="p-4 flex justify-between items-center bg-black/30 backdrop-blur-md">
+        <div id="round-label" class="bg-indigo-600 px-6 py-1 rounded-full font-bold shadow-lg">الجولة 1</div>
         <h1 id="main-title" class="text-xl font-black text-yellow-400 italic">حروف</h1>
-        <button onclick="location.reload()" class="bg-white/10 px-4 py-1 rounded-lg text-sm">إعادة</button>
+        <button onclick="location.reload()" class="bg-white/10 px-4 py-1 rounded-lg text-sm border border-white/10 transition hover:bg-white/20">إعادة البدء</button>
     </header>
 
     <div class="game-container">
@@ -108,24 +109,24 @@
             </div>
 
         <div class="side-panel">
-            <div class="score-box bg-green-600">
+            <div class="score-box bg-green-600 shadow-lg">
                 <h3 id="t1-name" class="font-bold italic">الأخضر</h3>
                 <div id="score1" class="text-5xl font-black">0</div>
             </div>
-            <div class="score-box bg-orange-600">
+            <div class="score-box bg-orange-600 shadow-lg">
                 <h3 id="t2-name" class="font-bold italic">البرتقالي</h3>
                 <div id="score2" class="text-5xl font-black">0</div>
             </div>
-            <div class="flex-1 bg-black/40 rounded-3xl p-6 flex flex-col items-center justify-center border border-white/5">
-                <span class="text-xs opacity-50 mb-2">الحرف الحالي</span>
-                <div id="current-letter" class="text-7xl font-black text-yellow-400">-</div>
+            <div class="flex-1 bg-black/40 rounded-3xl p-6 flex flex-col items-center justify-center border border-white/5 shadow-inner">
+                <span class="text-xs opacity-50 mb-2 uppercase tracking-widest">الحرف المختار</span>
+                <div id="current-letter" class="text-7xl font-black text-yellow-400 drop-shadow-xl">-</div>
             </div>
-            <button onclick="renderGrid()" class="bg-indigo-500/20 p-3 rounded-xl font-bold">🎲 خلط الحروف</button>
+            <button onclick="renderGrid()" class="bg-indigo-500/20 hover:bg-indigo-500/40 p-3 rounded-xl font-bold transition">🎲 خلط الحروف</button>
         </div>
     </div>
 
     <div id="win-overlay" class="overlay">
-        <h1 id="win-msg-main" class="text-7xl font-black text-yellow-400 mb-4"></h1>
+        <h1 id="win-msg-main" class="text-7xl font-black text-yellow-400 mb-4 drop-shadow-2xl"></h1>
         <h2 id="win-msg-sub" class="text-3xl font-bold text-white mb-8"></h2>
     </div>
 
@@ -137,13 +138,16 @@
         let team1Name = "", team2Name = "";
 
         function startGame() {
-            team1Name = document.getElementById('team1-name-input').value;
-            team2Name = document.getElementById('team2-name-input').value;
+            team1Name = document.getElementById('team1-name-input').value || "الأخضر";
+            team2Name = document.getElementById('team2-name-input').value || "البرتقالي";
             document.getElementById('main-title').innerText = document.getElementById('game-title-input').value || "حروف";
             document.getElementById('t1-name').innerText = team1Name;
             document.getElementById('t2-name').innerText = team2Name;
             document.getElementById('setup-screen').classList.add('hidden');
+            
             renderGrid();
+            // تأثير البداية (نفس تأثير الفوز)
+            startConfetti(3000); 
         }
 
         function renderGrid() {
@@ -152,31 +156,33 @@
             gridData = [];
             let pool = [...letters].sort(() => 0.5 - Math.random());
 
+            // شبكة 8 أعمدة لضمان وجود 6 خلايا خضراء في الوسط
             for (let r = 0; r < 7; r++) {
                 const row = document.createElement('div');
                 row.className = 'hex-row';
                 gridData[r] = [];
-                for (let c = 0; c < 7; c++) {
+                for (let c = 0; c < 8; c++) {
                     const hex = document.createElement('div');
                     hex.className = 'hex';
                     
-                    // تحديد الجدران (5 فوق/تحت، 5 يمين/يسار)
-                    const isTopRow = (r === 0 && c > 0 && c < 6); // 5 خلايا فوق
-                    const isBottomRow = (r === 6 && c > 0 && c < 6); // 5 خلايا تحت
-                    const isLeftCol = (c === 0 && r > 0 && r < 6); // 5 خلايا يسار
-                    const isRightCol = (c === 6 && r > 0 && r < 6); // 5 خلايا يمين
+                    // توزيع الجدران: 6 فوق و 6 تحت (الأعمدة من 1 لـ 6)
+                    const isTopRow = (r === 0 && c >= 1 && c <= 6);
+                    const isBottomRow = (r === 6 && c >= 1 && c <= 6);
                     
-                    // الزوايا غير مستخدمة (فارغة) لضبط الشكل
-                    const isCorner = (r === 0 || r === 6) && (c === 0 || c === 6);
+                    // 5 خلايا يمين ويسار
+                    const isLeftCol = (c === 0 && r >= 1 && r <= 5);
+                    const isRightCol = (c === 7 && r >= 1 && r <= 5);
+                    
+                    const isCorner = (r === 0 || r === 6) && (c === 0 || c === 7);
 
                     if (isTopRow || isBottomRow) {
                         hex.classList.add('edge-green');
                     } else if (isLeftCol || isRightCol) {
                         hex.classList.add('edge-orange');
-                    } else if (isCorner) {
+                    } else if (isCorner || (r===0 && c===7) || (r===6 && c===0)) {
                         hex.classList.add('empty');
                     } else {
-                        // منطقة اللعب (5x5)
+                        // منطقة الحروف
                         hex.innerText = pool.pop() || "؟";
                         hex.dataset.state = "0";
                         hex.onclick = () => handleHexClick(hex, r, c);
@@ -209,18 +215,19 @@
         function hasPath(target, mode) {
             const visited = new Set();
             const stack = [];
-            for (let i = 1; i <= 5; i++) {
+            // التحقق من الأعمدة من 1 إلى 6 (المنطقة الخضراء)
+            for (let i = 1; i <= 6; i++) {
                 let r = (mode === 'vertical') ? 1 : i;
                 let c = (mode === 'vertical') ? i : 1;
-                if (parseInt(gridData[r][c].dataset.state) === target) stack.push([r, c]);
+                if (gridData[r] && gridData[r][c] && parseInt(gridData[r][c].dataset.state) === target) stack.push([r, c]);
             }
             while (stack.length > 0) {
                 const [r, c] = stack.pop();
                 if (visited.has(`${r},${c}`)) continue;
                 visited.add(`${r},${c}`);
-                if ((mode === 'vertical' && r === 5) || (mode === 'horizontal' && c === 5)) return true;
+                if ((mode === 'vertical' && r === 5) || (mode === 'horizontal' && c === 6)) return true;
                 getNeighbors(r, c).forEach(([nr, nc]) => {
-                    if (nr >= 1 && nr <= 5 && nc >= 1 && nc <= 5 && parseInt(gridData[nr][nc].dataset.state) === target) stack.push([nr, nc]);
+                    if (gridData[nr] && gridData[nr][nc] && parseInt(gridData[nr][nc].dataset.state) === target) stack.push([nr, nc]);
                 });
             }
             return false;
@@ -241,7 +248,7 @@
 
             if (score1 === 2 || score2 === 2) {
                 document.getElementById('final-win-audio').play();
-                showOverlay("🏆 البطل 🏆", winner, 11000);
+                showOverlay("🏆 بطل المسابقة 🏆", winner, 11000);
                 startConfetti(11000);
                 setTimeout(() => location.reload(), 11500);
             } else {
@@ -261,8 +268,8 @@
         function startConfetti(ms) {
             const end = Date.now() + ms;
             (function frame() {
-                confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } });
-                confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } });
+                confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#facc15', '#22c55e', '#f97316'] });
+                confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#facc15', '#22c55e', '#f97316'] });
                 if (Date.now() < end) requestAnimationFrame(frame);
             }());
         }
