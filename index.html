@@ -157,17 +157,17 @@
             let pool = [...letters].sort(() => 0.5 - Math.random());
 
             // شبكة 8 أعمدة لضمان وجود 6 خلايا خضراء في الوسط
-            for (let r = 0; r < 7; r++) {
+            for (let r = 0; r < 5; r++) {
                 const row = document.createElement('div');
                 row.className = 'hex-row';
                 gridData[r] = [];
-                for (let c = 0; c < 8; c++) {
+                for (let c = 0; c < 5; c++) {
                     const hex = document.createElement('div');
                     hex.className = 'hex';
                     
                     // توزيع الجدران: 6 فوق و 6 تحت (الأعمدة من 1 لـ 6)
-                    const isTopRow = (r === 0 && c >= 1 && c <= 6);
-                    const isBottomRow = (r === 6 && c >= 1 && c <= 6);
+                    const isTopRow = (r === 0 && c >= 1 && c <= 5);
+                    const isBottomRow = (r === 6 && c >= 1 && c <= 5);
                     
                     // 5 خلايا يمين ويسار
                     const isLeftCol = (c === 0 && r >= 1 && r <= 5);
